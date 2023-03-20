@@ -7,6 +7,8 @@ const stripe = require("stripe")(
 
 const app = express();
 
+app.use(express.json());
+
 // const YOUR_DOMAIN = 'https://AutoDaddyAPI.uhakdt.repl.co/api/v1';
 const YOUR_DOMAIN = "http://localhost:4242";
 
@@ -576,6 +578,7 @@ sampleFullData = {
 
 sampleCheckData = {
   VehicleCheckData: {
+    LicensePlate: "AB23CDE",
     Model: "Tesla Model S Plaid",
     Colour: "Black",
     Year: 2023,
@@ -591,7 +594,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get("/api/v1/vehicledata/initial", async (req, res) => {
+app.post("/api/v1/vehicledata/initial", async (req, res) => {
   var config = {
     method: "get",
     url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
@@ -599,7 +602,9 @@ app.get("/api/v1/vehicledata/initial", async (req, res) => {
       "x-api-key": "cMQncH4Szk8qpKoPQOlTQ5Cu9paQSp3KuNIcxzt0",
       "Content-Type": "application/json",
     },
-    data: { registrationNumber: req.body.plateNumber },
+    data: JSON.stringify({
+      registrationNumber: req.body.licensePlate.toString(),
+    }),
   };
 
   // axios(config)
@@ -611,9 +616,10 @@ app.get("/api/v1/vehicledata/initial", async (req, res) => {
   // 	});
 
   res.send(sampleInitialData);
+  console.log("vehicledata/initial endpoint hit");
 });
 
-app.get("/api/v1/vehicledata/basic", async (req, res) => {
+app.post("/api/v1/vehicledata/basic", async (req, res) => {
   var config = {
     method: "get",
     url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
@@ -622,7 +628,7 @@ app.get("/api/v1/vehicledata/basic", async (req, res) => {
       "Content-Type": "application/json",
     },
     data: JSON.stringify({
-      registrationNumber: req.params.plateNumber.toString(),
+      registrationNumber: req.body.licensePlate.toString(),
     }),
   };
 
@@ -635,18 +641,20 @@ app.get("/api/v1/vehicledata/basic", async (req, res) => {
   // 	});
 
   res.send(sampleBasicData);
+  console.log("vehicledata/basic endpoint hit");
 });
 
-app.get("/api/v1/vehicledata/full", async (req, res) => {
+app.post("/api/v1/vehicledata/full", async (req, res) => {
+  console.log(req.body);
   var config = {
-    method: "get",
+    method: "post",
     url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
     headers: {
       "x-api-key": "cMQncH4Szk8qpKoPQOlTQ5Cu9paQSp3KuNIcxzt0",
       "Content-Type": "application/json",
     },
     data: JSON.stringify({
-      registrationNumber: req.params.plateNumber.toString(),
+      registrationNumber: req.body.licensePlate.toString(),
     }),
   };
 
@@ -659,9 +667,10 @@ app.get("/api/v1/vehicledata/full", async (req, res) => {
   // 	});
 
   res.send(sampleFullData);
+  console.log("vehicledata/full endpoint hit");
 });
 
-app.get("/api/v1/vehicledata/check/:plateNumber", async (req, res) => {
+app.get("/api/v1/vehicledata/check/:licensePlate", async (req, res) => {
   var config = {
     method: "get",
     url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
@@ -670,7 +679,7 @@ app.get("/api/v1/vehicledata/check/:plateNumber", async (req, res) => {
       "Content-Type": "application/json",
     },
     data: JSON.stringify({
-      registrationNumber: req.params.plateNumber.toString(),
+      registrationNumber: req.params.licensePlate.toString(),
     }),
   };
 
@@ -683,6 +692,7 @@ app.get("/api/v1/vehicledata/check/:plateNumber", async (req, res) => {
   // 	});
 
   res.send(sampleCheckData);
+  console.log("vehicledata/check endpoint hit");
 });
 
 app.get("/api/v1/chatgpt", async (req, res) => {});
@@ -709,5 +719,5 @@ app.get("/", (req, res) => {
   res.send("Hello");
 });
 
-const port = process.env.PORT || 4242;
+const port = 4242;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
