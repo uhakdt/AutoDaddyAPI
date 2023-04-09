@@ -645,28 +645,57 @@ app.post("/api/v1/vehicledata/basic", async (req, res) => {
 });
 
 app.post("/api/v1/vehicledata/full", async (req, res) => {
-  console.log(req.body);
-  var config = {
-    method: "post",
-    url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
-    headers: {
-      "x-api-key": "cMQncH4Szk8qpKoPQOlTQ5Cu9paQSp3KuNIcxzt0",
-      "Content-Type": "application/json",
-    },
-    data: JSON.stringify({
-      registrationNumber: req.body.licensePlate.toString(),
-    }),
+  const apiKey = "ad296227-c4a3-44e3-806b-476d634439e8";
+
+  const packages = [
+    "BatteryData",
+    "FuelPriceData",
+    "MotHistoryAndTaxStatusData",
+    "MotHistoryData",
+    "PostcodeLookup",
+    "SpecAndOptionsData",
+    "TyreData",
+    "ValuationCanPrice",
+    "ValuationData",
+    "VdiCheckFull",
+    "VehicleAndMotHistory",
+    "VehicleData",
+    "VehicleDataIRL",
+    "VehicleImageData",
+    "VehicleTaxData",
+  ];
+
+  const fetchData = async (packageName, vehicleRegMark, apiKey) => {
+    const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${apiKey}`;
+    const response = await axios.get(url);
+
+    if (response.status !== 200) {
+      throw new Error("Network response was not ok");
+    }
+
+    return response.data;
   };
 
-  // axios(config)
-  // 	.then(function(response) {
-  // 		res.send(response.data);
-  // 	})
-  // 	.catch(function(error) {
-  // 		console.log(error);
-  // 	});
+  const fetchAllData = async (packages, vehicleRegMark, apiKey) => {
+    const data = await Promise.all(
+      packages.map((packageName) =>
+        fetchData(packageName, vehicleRegMark, apiKey)
+      )
+    );
 
-  res.send(sampleFullData);
+    return Object.assign({}, ...data);
+  };
+
+  fetchAllData(packages, req.body.licensePlate.toString(), apiKey)
+    .then((data) => {
+      console.log("Data fetched successfully!");
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+    });
+
+  res.send("test");
   console.log("vehicledata/full endpoint hit");
 });
 
