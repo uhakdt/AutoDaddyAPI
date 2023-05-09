@@ -125,23 +125,37 @@ app.post("/api/v1/vehicledata/full", async (req, res) => {
 
 app.get("/api/v1/chatgpt", async (req, res) => {});
 
-app.post("/api/v1/create-checkout-session", async (req, res) => {
-  // const session = await stripe.checkout.sessions.create({
-  //   line_items: [
-  //     {
-  //       // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-  //       price: "{{PRICE_ID}}",
-  //       quantity: 1,
-  //     },
-  //   ],
-  //   mode: "payment",
-  //   success_url: `${YOUR_DOMAIN}?success=true`,
-  //   cancel_url: `${YOUR_DOMAIN}?canceled=true`,
-  //   automatic_tax: { enabled: true },
-  // });
+app.post("/api/v1/payment/:tier", async (req, res) => {
+  let priceId;
 
-  // res.redirect(303, session.url);
-  res.send("Hello");
+  if (req.params.tier.toString() === "basic") {
+    priceId = "price_1N5fRvLJE9t4rWObAZejM2KP";
+  } else if (req.params.tier.toString() === "full") {
+    priceId = "price_1N5fSNLJE9t4rWObyuziwRXa";
+  } else {
+    res.status(400).send("Invalid tier");
+    return;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${YOUR_DOMAIN}?success=true`,
+      cancel_url: `${YOUR_DOMAIN}?canceled=true`,
+      automatic_tax: { enabled: true },
+    });
+
+    res.redirect(303, session.url);
+  } catch (error) {
+    console.error("Error creating Stripe session:", error);
+    res.status(500).send("Failed to create Stripe session");
+  }
 });
 
 app.get("/", (req, res) => {
