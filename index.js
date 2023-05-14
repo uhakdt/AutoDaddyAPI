@@ -1,16 +1,32 @@
 const express = require("express");
 const axios = require("axios");
+const admin = require("firebase-admin");
+require("dotenv").config();
 
 const stripe = require("stripe")(
   "sk_test_51MkoADLJE9t4rWObnQV3ZeAJM7moXR7nDUe4KoaJDkulj219tB9V9l2u0EVu9gCGQUq8l9xBJAeL1IQ00l9hgQyt00b0vki7wT"
 );
+const stripeWebhookSecret = "your_stripe_webhook_secret"; // Replace this with your Stripe webhook signing secret
 
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const bodyParser = require("body-parser"); // If you don't have this already, install with npm install --save body-parser
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  }),
+});
+
+const db = admin.firestore();
 
 // const YOUR_DOMAIN = 'https://AutoDaddyAPI.uhakdt.repl.co/api/v1';
-const YOUR_DOMAIN = "http://localhost:4242";
+const CLIENT_DOMAIN = "http://localhost:3000";
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -125,12 +141,16 @@ app.post("/api/v1/vehicledata/full", async (req, res) => {
 
 app.get("/api/v1/chatgpt", async (req, res) => {});
 
-app.post("/api/v1/payment/:tier", async (req, res) => {
+app.post("/api/v1/create-checkout-session", async (req, res) => {
+  var vehicleFreeData = JSON.parse(req.body.vehicleFreeData);
+  var tier = JSON.parse(req.body.tier);
+  var userId = JSON.parse(req.body.userId);
+
   let priceId;
 
-  if (req.params.tier.toString() === "basic") {
+  if (tier.toString() === "basic") {
     priceId = "price_1N5fRvLJE9t4rWObAZejM2KP";
-  } else if (req.params.tier.toString() === "full") {
+  } else if (tier.toString() === "full") {
     priceId = "price_1N5fSNLJE9t4rWObyuziwRXa";
   } else {
     res.status(400).send("Invalid tier");
@@ -146,16 +166,60 @@ app.post("/api/v1/payment/:tier", async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${YOUR_DOMAIN}?success=true`,
-      cancel_url: `${YOUR_DOMAIN}?canceled=true`,
+      success_url: `${CLIENT_DOMAIN}/payment?success=true`,
+      cancel_url: `${CLIENT_DOMAIN}/payment?canceled=true`,
       automatic_tax: { enabled: true },
     });
+
+    const docRef = db.collection("orders").doc(session.id);
+    await docRef.set({ sessionId: session.id });
 
     res.redirect(303, session.url);
   } catch (error) {
     console.error("Error creating Stripe session:", error);
     res.status(500).send("Failed to create Stripe session");
   }
+});
+
+app.post("/api/v1/webhook", bodyParser.json(), (request, response) => {
+  let event = request.body;
+  // Only verify the event if you have an endpoint secret defined.
+  // Otherwise use the basic event deserialized with JSON.parse
+  if (process.env.STRIPE_WEBHOOK_SECRET) {
+    // Get the signature sent by Stripe
+    const signature = request.headers["stripe-signature"];
+    try {
+      event = stripe.webhooks.constructEvent(
+        request.body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.log(`⚠️  Webhook signature verification failed.`, err.message);
+      return response.sendStatus(400);
+    }
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      const paymentIntent = event.data.object;
+      console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
+      // Then define and call a method to handle the successful payment intent.
+      // handlePaymentIntentSucceeded(paymentIntent);
+      break;
+    case "payment_method.attached":
+      const paymentMethod = event.data.object;
+      // Then define and call a method to handle the successful attachment of a PaymentMethod.
+      // handlePaymentMethodAttached(paymentMethod);
+      break;
+    default:
+      // Unexpected event type
+      console.log(`Unhandled event type ${event.type}.`);
+  }
+
+  // Return a 200 response to acknowledge receipt of the event
+  response.send();
 });
 
 app.get("/", (req, res) => {
