@@ -42,7 +42,7 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
     method: "post",
     url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
     headers: {
-      "x-api-key": "cMQncH4Szk8qpKoPQOlTQ5Cu9paQSp3KuNIcxzt0",
+      "x-api-key": process.env.VEHICLE_FREE_DATA_API_KEY,
       "Content-Type": "application/json",
     },
     data: JSON.stringify({
@@ -61,57 +61,26 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
   console.log("vehicledata/free endpoint hit");
 });
 
-app.post("/api/v1/vehicledata/basic", async (req, res) => {
-  var config = {
-    method: "get",
-    url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
-    headers: {
-      "x-api-key": "cMQncH4Szk8qpKoPQOlTQ5Cu9paQSp3KuNIcxzt0",
-      "Content-Type": "application/json",
-    },
-    data: JSON.stringify({
-      registrationNumber: req.body.registrationNumber.toString(),
-    }),
-  };
-
-  axios(config)
-    .then(function (response) {
-      res.send(response.data);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-
-  console.log("vehicledata/basic endpoint hit");
-});
-
 app.post("/api/v1/vehicledata/full", async (req, res) => {
-  const apiKey = "ad296227-c4a3-44e3-806b-476d634439e8";
-
-  const packages = [
-    "BatteryData",
-    "FuelPriceData",
-    "MotHistoryAndTaxStatusData",
-    "MotHistoryData",
-    "PostcodeLookup",
-    "SpecAndOptionsData",
-    "TyreData",
-    "ValuationCanPrice",
-    "ValuationData",
-    "VdiCheckFull",
-    "VehicleAndMotHistory",
-    "VehicleData",
-    "VehicleDataIRL",
-    "VehicleImageData",
-    "VehicleTaxData",
-  ];
+  const apiKey = process.env.UKVD_API_KEY_DEV;
+  const packages = ["VehicleAndMotHistory"];
 
   const fetchData = async (packageName, vehicleRegMark, apiKey) => {
     const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${apiKey}`;
     const response = await axios.get(url);
 
     if (response.status !== 200) {
-      throw new Error("Network response was not ok");
+      throw new Error(`API response was not ok. Status: ${response.status}`);
+    }
+
+    if (response.data.Response.StatusCode === "KeyInvalid") {
+      throw new Error(
+        "Invalid VRM. Please provide a valid vehicle registration mark"
+      );
+    }
+
+    if (response.data.Response.StatusCode !== "Success") {
+      throw new Error(`API error: ${response.data.Response.StatusMessage}`);
     }
 
     return response.data;
@@ -127,66 +96,49 @@ app.post("/api/v1/vehicledata/full", async (req, res) => {
     return Object.assign({}, ...data);
   };
 
-  fetchAllData(packages, req.body.registrationNumber.toString(), apiKey)
-    .then((data) => {
-      console.log("Data fetched successfully!");
-      console.log(data);
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
+  try {
+    // Validate request parameters
+    if (!req.body.registrationNumber || !req.body.uid || !req.body.orderId) {
+      res
+        .status(400)
+        .send("Registration number, user UID, and order ID are required");
+      return;
+    }
 
-  console.log("vehicledata/full endpoint hit");
+    const dataMain = await fetchAllData(
+      packages,
+      req.body.registrationNumber.toString(),
+      apiKey
+    );
+
+    // Get the specific order document of the user
+    const orderDoc = db
+      .collection("users")
+      .doc(req.body.uid)
+      .collection("orders")
+      .doc(req.body.orderId);
+
+    // Add the vehicleData to the order document
+    await orderDoc.set({ vehicleData: dataMain }, { merge: true });
+
+    res
+      .status(200)
+      .send("Vehicle data added successfully to the order document.");
+  } catch (error) {
+    console.error("There was a problem with the fetch operation:", error);
+    res
+      .status(500)
+      .send("An error occurred while fetching data. Please try again.");
+  }
 });
 
 app.get("/api/v1/chatgpt", async (req, res) => {});
 
-// app.post("/api/v1/create-checkout-session", async (req, res) => {
-//   var vehicleFreeData = JSON.parse(req.body.vehicleFreeData);
-//   var tier = JSON.parse(req.body.tier);
-//   var userId = JSON.parse(req.body.userId);
-
-//   let priceId;
-
-//   if (tier.toString() === "basic") {
-//     priceId = "price_1N5fRvLJE9t4rWObAZejM2KP";
-//   } else if (tier.toString() === "full") {
-//     priceId = "price_1N5fSNLJE9t4rWObyuziwRXa";
-//   } else {
-//     res.status(400).send("Invalid tier");
-//     return;
-//   }
-
-//   try {
-//     const session = await stripe.checkout.sessions.create({
-//       line_items: [
-//         {
-//           price: priceId,
-//           quantity: 1,
-//         },
-//       ],
-//       mode: "payment",
-//       success_url: `${CLIENT_DOMAIN}/payment?success=true`,
-//       cancel_url: `${CLIENT_DOMAIN}/payment?canceled=true`,
-//       automatic_tax: { enabled: true },
-//     });
-
-//     const docRef = db.collection("orders").doc(session.id);
-//     await docRef.set({ sessionId: session.id });
-
-//     res.redirect(303, session.url);
-//   } catch (error) {
-//     console.error("Error creating Stripe session:", error);
-//     res.status(500).send("Failed to create Stripe session");
-//   }
-// });
-
 app.post("/api/v1/create-payment-intent", async (req, res) => {
-  const { email } = req.body;
-  console.log(req.body);
+  const { email, price, vehicleFreeData } = req.body;
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: 100,
+    amount: price,
     currency: "gbp",
     automatic_payment_methods: {
       enabled: true,
@@ -199,10 +151,8 @@ app.post("/api/v1/create-payment-intent", async (req, res) => {
   });
 });
 
-app.post("/webhooks", (req, res) => {
-  console.log("Webhook received:", req.rawBody); // Debug Statement 1
-  console.log("Headers:", req.headers); // Debug Statement 2
-
+app.post("/api/v1/webhook", (req, res) => {
+  console.log("webhook endpoint hit");
   const sig = req.headers["stripe-signature"];
   let event;
 
@@ -211,21 +161,87 @@ app.post("/webhooks", (req, res) => {
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-  // Handle the event
+
   switch (event.type) {
     case "payment_intent.succeeded": {
-      const email = event["data"]["object"]["receipt_email"]; // contains the email that will recive the recipt for the payment (users email usually)
-      console.log(`PaymentIntent was successful for ${email}!`);
+      console.log("PaymentIntent was successful!");
+      const email = event["data"]["object"]["receipt_email"];
+      const regNumber = event["data"]["object"]["metadata"]["regNumber"];
+
+      fetchAndStoreVehicleData(email, regNumber)
+        .then(() => {
+          res.json({ received: true });
+        })
+        .catch((err) => {
+          console.error(`Error handling success: ${err}`);
+          res.status(500).send(err.message);
+        });
       break;
     }
     default:
-      // Unexpected event type
       return res.status(400).end();
   }
-
-  // Return a 200 response to acknowledge receipt of the event
   res.json({ received: true });
 });
+
+const fetchAndStoreVehicleData = async (email, regNumber) => {
+  const apiKey = process.env.UKVD_API_KEY_DEV;
+  const packages = ["VehicleAndMotHistory"];
+
+  const fetchData = async (packageName, vehicleRegMark, apiKey) => {
+    const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${apiKey}`;
+    const response = await axios.get(url);
+
+    if (response.status !== 200) {
+      throw new Error(`API response was not ok. Status: ${response.status}`);
+    }
+
+    if (response.data.Response.StatusCode === "KeyInvalid") {
+      throw new Error(
+        "Invalid VRM. Please provide a valid vehicle registration mark"
+      );
+    }
+
+    if (response.data.Response.StatusCode !== "Success") {
+      throw new Error(`API error: ${response.data.Response.StatusMessage}`);
+    }
+
+    return response.data;
+  };
+
+  const fetchAllData = async (packages, vehicleRegMark, apiKey) => {
+    const data = await Promise.all(
+      packages.map((packageName) =>
+        fetchData(packageName, vehicleRegMark, apiKey)
+      )
+    );
+
+    return Object.assign({}, ...data);
+  };
+
+  const userSnapshot = await db
+    .collection("users")
+    .where("email", "==", email)
+    .get();
+
+  if (userSnapshot.empty) {
+    throw new Error(`No user found with email: ${email}`);
+  }
+
+  const userDoc = userSnapshot.docs[0];
+  const uid = userDoc.get("uid");
+  const orderId = userDoc.get("orderId");
+
+  const dataMain = await fetchAllData(packages, regNumber.toString(), apiKey);
+
+  const orderDoc = db
+    .collection("users")
+    .doc(uid)
+    .collection("orders")
+    .doc(orderId);
+
+  await orderDoc.set({ vehicleData: dataMain }, { merge: true });
+};
 
 app.get("/", (req, res) => {
   res.send("Hello");
