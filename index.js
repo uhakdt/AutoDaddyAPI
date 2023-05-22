@@ -1,5 +1,6 @@
 const axios = require("axios");
 const admin = require("firebase-admin");
+const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_DEV);
 const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK;
@@ -61,77 +62,6 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
   console.log("vehicledata/free endpoint hit");
 });
 
-app.post("/api/v1/vehicledata/full", async (req, res) => {
-  const apiKey = process.env.UKVD_API_KEY_DEV;
-  const packages = ["VehicleAndMotHistory"];
-
-  const fetchData = async (packageName, vehicleRegMark, apiKey) => {
-    const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${apiKey}`;
-    const response = await axios.get(url);
-
-    if (response.status !== 200) {
-      throw new Error(`API response was not ok. Status: ${response.status}`);
-    }
-
-    if (response.data.Response.StatusCode === "KeyInvalid") {
-      throw new Error(
-        "Invalid VRM. Please provide a valid vehicle registration mark"
-      );
-    }
-
-    if (response.data.Response.StatusCode !== "Success") {
-      throw new Error(`API error: ${response.data.Response.StatusMessage}`);
-    }
-
-    return response.data;
-  };
-
-  const fetchAllData = async (packages, vehicleRegMark, apiKey) => {
-    const data = await Promise.all(
-      packages.map((packageName) =>
-        fetchData(packageName, vehicleRegMark, apiKey)
-      )
-    );
-
-    return Object.assign({}, ...data);
-  };
-
-  try {
-    // Validate request parameters
-    if (!req.body.registrationNumber || !req.body.uid || !req.body.orderId) {
-      res
-        .status(400)
-        .send("Registration number, user UID, and order ID are required");
-      return;
-    }
-
-    const dataMain = await fetchAllData(
-      packages,
-      req.body.registrationNumber.toString(),
-      apiKey
-    );
-
-    // Get the specific order document of the user
-    const orderDoc = db
-      .collection("users")
-      .doc(req.body.uid)
-      .collection("orders")
-      .doc(req.body.orderId);
-
-    // Add the vehicleData to the order document
-    await orderDoc.set({ vehicleData: dataMain }, { merge: true });
-
-    res
-      .status(200)
-      .send("Vehicle data added successfully to the order document.");
-  } catch (error) {
-    console.error("There was a problem with the fetch operation:", error);
-    res
-      .status(500)
-      .send("An error occurred while fetching data. Please try again.");
-  }
-});
-
 app.get("/api/v1/chatgpt", async (req, res) => {});
 
 app.post("/api/v1/create-payment-intent", async (req, res) => {
@@ -144,6 +74,9 @@ app.post("/api/v1/create-payment-intent", async (req, res) => {
       enabled: true,
     },
     receipt_email: email,
+    metadata: {
+      registrationNumber: vehicleFreeData.registrationNumber,
+    },
   });
 
   res.send({
@@ -164,11 +97,13 @@ app.post("/api/v1/webhook", (req, res) => {
 
   switch (event.type) {
     case "payment_intent.succeeded": {
-      console.log("PaymentIntent was successful!");
       const email = event["data"]["object"]["receipt_email"];
-      const regNumber = event["data"]["object"]["metadata"]["regNumber"];
+      const amount = event["data"]["object"]["amount"];
+      const registrationNumber =
+        event["data"]["object"]["metadata"]["registrationNumber"];
+      const paymentId = event["data"]["object"]["id"];
 
-      fetchAndStoreVehicleData(email, regNumber)
+      fetchAndStoreVehicleData(email, registrationNumber, paymentId, amount)
         .then(() => {
           res.json({ received: true });
         })
@@ -181,12 +116,26 @@ app.post("/api/v1/webhook", (req, res) => {
     default:
       return res.status(400).end();
   }
-  res.json({ received: true });
 });
 
-const fetchAndStoreVehicleData = async (email, regNumber) => {
+app.get("/", (req, res) => {
+  res.send("Hello");
+});
+
+const fetchAndStoreVehicleData = async (
+  email,
+  registrationNumber,
+  paymentId,
+  amount
+) => {
   const apiKey = process.env.UKVD_API_KEY_DEV;
-  const packages = ["VehicleAndMotHistory"];
+
+  let packages;
+  if (amount === 300) {
+    packages = ["VehicleAndMotHistory"];
+  } else if (amount === 900) {
+    packages = ["VehicleAndMotHistory", "VdiCheckFull"];
+  }
 
   const fetchData = async (packageName, vehicleRegMark, apiKey) => {
     const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${apiKey}`;
@@ -206,6 +155,7 @@ const fetchAndStoreVehicleData = async (email, regNumber) => {
       throw new Error(`API error: ${response.data.Response.StatusMessage}`);
     }
 
+    console.log("API response was ok");
     return response.data;
   };
 
@@ -216,36 +166,44 @@ const fetchAndStoreVehicleData = async (email, regNumber) => {
       )
     );
 
-    return Object.assign({}, ...data);
+    const dataObject = {};
+    for (let i = 0; i < packages.length; i++) {
+      dataObject[packages[i]] = data[i].Response.DataItems;
+    }
+
+    return dataObject;
   };
 
-  const userSnapshot = await db
-    .collection("users")
-    .where("email", "==", email)
-    .get();
+  const user = await db.collection("users").where("email", "==", email).get();
 
-  if (userSnapshot.empty) {
+  if (user.empty) {
     throw new Error(`No user found with email: ${email}`);
   }
 
-  const userDoc = userSnapshot.docs[0];
+  const userDoc = user.docs[0];
   const uid = userDoc.get("uid");
-  const orderId = userDoc.get("orderId");
 
-  const dataMain = await fetchAllData(packages, regNumber.toString(), apiKey);
+  const dataMain = await fetchAllData(
+    packages,
+    registrationNumber.toString(),
+    apiKey
+  );
 
-  const orderDoc = db
-    .collection("users")
-    .doc(uid)
-    .collection("orders")
-    .doc(orderId);
+  const orderId = uuidv4();
 
-  await orderDoc.set({ vehicleData: dataMain }, { merge: true });
+  const orderDoc = db.collection("orders").doc(orderId);
+
+  const currentDateTime = new Date().toISOString();
+
+  await orderDoc.set({
+    orderId: orderId,
+    userId: uid,
+    paymentId: paymentId,
+    data: dataMain,
+    dateTime: currentDateTime,
+    registrationNumber: registrationNumber,
+  });
 };
-
-app.get("/", (req, res) => {
-  res.send("Hello");
-});
 
 const port = 4242;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
