@@ -2,8 +2,8 @@ const axios = require("axios");
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK;
+const stripe = require("stripe")(process.env["STRIPE_SECRET_KEY"]);
+const endpointSecret = process.env["STRIPE_SECRET_WEBHOOK"];
 
 // EXPRESS SETUP
 const express = require("express");
@@ -25,14 +25,14 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
-app.use(cors({ origin: process.env.CLIENT_DOMAIN }));
+app.use(cors({ origin: process.env["CLIENT_DOMAIN"] }));
 
 // FIREBASE SETUP
 admin.initializeApp({
   credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    projectId: process.env["FIREBASE_PROJECT_ID"],
+    clientEmail: process.env["FIREBASE_CLIENT_EMAIL"],
+    privateKey: process.env["FIREBASE_PRIVATE_KEY"].replace(/\\n/g, "\n"),
   }),
 });
 const db = admin.firestore();
@@ -41,9 +41,9 @@ const db = admin.firestore();
 app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
   var config = {
     method: "post",
-    url: process.env.VEHICLE_FREE_DATA_URL,
+    url: process.env["VEHICLE_FREE_DATA_URL"],
     headers: {
-      "x-api-key": process.env.VEHICLE_FREE_DATA_API_KEY,
+      "x-api-key": process.env["VEHICLE_FREE_DATA_API_KEY"],
       "Content-Type": "application/json",
     },
     data: JSON.stringify({
@@ -107,7 +107,7 @@ app.post("/api/v1/webhook", (req, res) => {
         registrationNumber,
         paymentId,
         amount,
-        process.env.UKVD_API_KEY
+        process.env["UKVD_API_KEY"]
       )
         .then(() => {
           res.json({ received: true });
