@@ -53,7 +53,6 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
 
   axios(config)
     .then(function (response) {
-      console.log(response.data);
       res.send(response.data);
     })
     .catch(function (error) {
@@ -128,6 +127,7 @@ const fetchAndStoreVehicleData = async (
   paymentId,
   amount
 ) => {
+  console.log("fetchAndStoreVehicleData function called");
   const apiKey = process.env.UKVD_API_KEY_DEV;
 
   let packages;
@@ -203,6 +203,7 @@ const fetchAndStoreVehicleData = async (
     dateTime: currentDateTime,
     registrationNumber: registrationNumber,
   });
+  console.log("Order successfully written to database");
 };
 
 const port = 4242;
