@@ -2,7 +2,7 @@ const axios = require("axios");
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_DEV);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK;
 
 // EXPRESS SETUP
@@ -25,7 +25,7 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: process.env.CLIENT_DOMAIN }));
 
 // FIREBASE SETUP
 admin.initializeApp({
@@ -41,7 +41,7 @@ const db = admin.firestore();
 app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
   var config = {
     method: "post",
-    url: "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles",
+    url: process.env.VEHICLE_FREE_DATA_URL,
     headers: {
       "x-api-key": process.env.VEHICLE_FREE_DATA_API_KEY,
       "Content-Type": "application/json",
@@ -102,7 +102,13 @@ app.post("/api/v1/webhook", (req, res) => {
         event["data"]["object"]["metadata"]["registrationNumber"];
       const paymentId = event["data"]["object"]["id"];
 
-      fetchAndStoreVehicleData(email, registrationNumber, paymentId, amount)
+      fetchAndStoreVehicleData(
+        email,
+        registrationNumber,
+        paymentId,
+        amount,
+        process.env.UKVD_API_KEY
+      )
         .then(() => {
           res.json({ received: true });
         })
@@ -125,10 +131,10 @@ const fetchAndStoreVehicleData = async (
   email,
   registrationNumber,
   paymentId,
-  amount
+  amount,
+  ukvdApiKey
 ) => {
   console.log("fetchAndStoreVehicleData function called");
-  const apiKey = process.env.UKVD_API_KEY_DEV;
 
   let packages;
   if (amount === 300) {
@@ -137,8 +143,8 @@ const fetchAndStoreVehicleData = async (
     packages = ["VehicleAndMotHistory", "VdiCheckFull"];
   }
 
-  const fetchData = async (packageName, vehicleRegMark, apiKey) => {
-    const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${apiKey}`;
+  const fetchData = async (packageName, vehicleRegMark, ukvdApiKey) => {
+    const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${ukvdApiKey}`;
     const response = await axios.get(url);
 
     if (response.status !== 200) {
@@ -159,10 +165,10 @@ const fetchAndStoreVehicleData = async (
     return response.data;
   };
 
-  const fetchAllData = async (packages, vehicleRegMark, apiKey) => {
+  const fetchAllData = async (packages, vehicleRegMark, ukvdApiKey) => {
     const data = await Promise.all(
       packages.map((packageName) =>
-        fetchData(packageName, vehicleRegMark, apiKey)
+        fetchData(packageName, vehicleRegMark, ukvdApiKey)
       )
     );
 
@@ -186,7 +192,7 @@ const fetchAndStoreVehicleData = async (
   const dataMain = await fetchAllData(
     packages,
     registrationNumber.toString(),
-    apiKey
+    ukvdApiKey
   );
 
   const orderId = uuidv4();
