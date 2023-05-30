@@ -97,7 +97,6 @@ app.post("/api/v1/webhook", (req, res) => {
   switch (event.type) {
     case "payment_intent.succeeded": {
       const email = event["data"]["object"]["receipt_email"];
-      const amount = event["data"]["object"]["amount"];
       const registrationNumber =
         event["data"]["object"]["metadata"]["registrationNumber"];
       const paymentId = event["data"]["object"]["id"];
@@ -106,7 +105,6 @@ app.post("/api/v1/webhook", (req, res) => {
         email,
         registrationNumber,
         paymentId,
-        amount,
         process.env["UKVD_API_KEY"]
       )
         .then(() => {
@@ -123,25 +121,13 @@ app.post("/api/v1/webhook", (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello");
-});
-
 const fetchAndStoreVehicleData = async (
   email,
   registrationNumber,
   paymentId,
-  amount,
   ukvdApiKey
 ) => {
-  console.log("fetchAndStoreVehicleData function called");
-
-  let packages;
-  if (amount === 300) {
-    packages = ["VehicleAndMotHistory"];
-  } else if (amount === 900) {
-    packages = ["VehicleAndMotHistory", "VdiCheckFull"];
-  }
+  let packages = ["VehicleAndMotHistory", "VdiCheckFull"];
 
   const fetchData = async (packageName, vehicleRegMark, ukvdApiKey) => {
     const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${ukvdApiKey}`;
@@ -161,7 +147,6 @@ const fetchAndStoreVehicleData = async (
       throw new Error(`API error: ${response.data.Response.StatusMessage}`);
     }
 
-    console.log("API response was ok");
     return response.data;
   };
 
