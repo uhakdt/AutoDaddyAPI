@@ -113,25 +113,25 @@ app.post("/api/v1/webhook", (req, res) => {
     case "payment_intent.succeeded": {
       const email = event["data"]["object"]["receipt_email"];
       const vehicleFreeData = {
-        registrationNumber:
+        RegistrationNumber:
           event["data"]["object"]["metadata"]["registrationNumber"],
-        taxStatus: event["data"]["object"]["metadata"]["taxStatus"],
-        taxDueDate: event["data"]["object"]["metadata"]["taxDueDate"],
-        motStatus: event["data"]["object"]["metadata"]["motStatus"],
-        make: event["data"]["object"]["metadata"]["make"],
-        yearOfManufacture:
+        TaxStatus: event["data"]["object"]["metadata"]["taxStatus"],
+        TaxDueDate: event["data"]["object"]["metadata"]["taxDueDate"],
+        MotStatus: event["data"]["object"]["metadata"]["motStatus"],
+        Make: event["data"]["object"]["metadata"]["make"],
+        YearOfManufacture:
           event["data"]["object"]["metadata"]["yearOfManufacture"],
-        engineCapacity: event["data"]["object"]["metadata"]["engineCapacity"],
-        co2Emissions: event["data"]["object"]["metadata"]["co2Emissions"],
-        fuelType: event["data"]["object"]["metadata"]["fuelType"],
-        markedForExport: event["data"]["object"]["metadata"]["markedForExport"],
-        colour: event["data"]["object"]["metadata"]["colour"],
-        typeApproval: event["data"]["object"]["metadata"]["typeApproval"],
-        dateOfLastV5CIssued:
+        EngineCapacity: event["data"]["object"]["metadata"]["engineCapacity"],
+        Co2Emissions: event["data"]["object"]["metadata"]["co2Emissions"],
+        FuelType: event["data"]["object"]["metadata"]["fuelType"],
+        MarkedForExport: event["data"]["object"]["metadata"]["markedForExport"],
+        Colour: event["data"]["object"]["metadata"]["colour"],
+        TypeApproval: event["data"]["object"]["metadata"]["typeApproval"],
+        DateOfLastV5CIssued:
           event["data"]["object"]["metadata"]["dateOfLastV5CIssued"],
-        motExpiryDate: event["data"]["object"]["metadata"]["motExpiryDate"],
-        wheelplan: event["data"]["object"]["metadata"]["wheelplan"],
-        monthOfFirstRegistration:
+        MotExpiryDate: event["data"]["object"]["metadata"]["motExpiryDate"],
+        Wheelplan: event["data"]["object"]["metadata"]["wheelplan"],
+        MonthOfFirstRegistration:
           event["data"]["object"]["metadata"]["monthOfFirstRegistration"],
       };
 
@@ -212,7 +212,7 @@ const fetchAndStoreVehicleData = async (
 
   const dataMain = await fetchAllData(
     packages,
-    vehicleFreeData.registrationNumber.toString(),
+    vehicleFreeData.RegistrationNumber.toString(),
     ukvdApiKey
   );
 
