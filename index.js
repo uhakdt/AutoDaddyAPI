@@ -75,6 +75,21 @@ app.post("/api/v1/create-payment-intent", async (req, res) => {
     receipt_email: email,
     metadata: {
       registrationNumber: vehicleFreeData.registrationNumber,
+      taxStatus: vehicleFreeData.taxStatus,
+      taxDueDate: vehicleFreeData.taxDueDate,
+      motStatus: vehicleFreeData.motStatus,
+      make: vehicleFreeData.make,
+      yearOfManufacture: vehicleFreeData.yearOfManufacture,
+      engineCapacity: vehicleFreeData.engineCapacity,
+      co2Emissions: vehicleFreeData.co2Emissions,
+      fuelType: vehicleFreeData.fuelType,
+      markedForExport: vehicleFreeData.markedForExport,
+      colour: vehicleFreeData.colour,
+      typeApproval: vehicleFreeData.typeApproval,
+      dateOfLastV5CIssued: vehicleFreeData.dateOfLastV5CIssued,
+      motExpiryDate: vehicleFreeData.motExpiryDate,
+      wheelplan: vehicleFreeData.wheelplan,
+      monthOfFirstRegistration: vehicleFreeData.monthOfFirstRegistration,
     },
   });
 
@@ -97,13 +112,34 @@ app.post("/api/v1/webhook", (req, res) => {
   switch (event.type) {
     case "payment_intent.succeeded": {
       const email = event["data"]["object"]["receipt_email"];
-      const registrationNumber =
-        event["data"]["object"]["metadata"]["registrationNumber"];
+      const vehicleFreeData = {
+        registrationNumber:
+          event["data"]["object"]["metadata"]["registrationNumber"],
+        taxStatus: event["data"]["object"]["metadata"]["taxStatus"],
+        taxDueDate: event["data"]["object"]["metadata"]["taxDueDate"],
+        motStatus: event["data"]["object"]["metadata"]["motStatus"],
+        make: event["data"]["object"]["metadata"]["make"],
+        yearOfManufacture:
+          event["data"]["object"]["metadata"]["yearOfManufacture"],
+        engineCapacity: event["data"]["object"]["metadata"]["engineCapacity"],
+        co2Emissions: event["data"]["object"]["metadata"]["co2Emissions"],
+        fuelType: event["data"]["object"]["metadata"]["fuelType"],
+        markedForExport: event["data"]["object"]["metadata"]["markedForExport"],
+        colour: event["data"]["object"]["metadata"]["colour"],
+        typeApproval: event["data"]["object"]["metadata"]["typeApproval"],
+        dateOfLastV5CIssued:
+          event["data"]["object"]["metadata"]["dateOfLastV5CIssued"],
+        motExpiryDate: event["data"]["object"]["metadata"]["motExpiryDate"],
+        wheelplan: event["data"]["object"]["metadata"]["wheelplan"],
+        monthOfFirstRegistration:
+          event["data"]["object"]["metadata"]["monthOfFirstRegistration"],
+      };
+
       const paymentId = event["data"]["object"]["id"];
 
       fetchAndStoreVehicleData(
         email,
-        registrationNumber,
+        vehicleFreeData,
         paymentId,
         process.env["UKVD_API_KEY"]
       )
@@ -123,7 +159,7 @@ app.post("/api/v1/webhook", (req, res) => {
 
 const fetchAndStoreVehicleData = async (
   email,
-  registrationNumber,
+  vehicleFreeData,
   paymentId,
   ukvdApiKey
 ) => {
@@ -176,7 +212,7 @@ const fetchAndStoreVehicleData = async (
 
   const dataMain = await fetchAllData(
     packages,
-    registrationNumber.toString(),
+    vehicleFreeData.registrationNumber.toString(),
     ukvdApiKey
   );
 
@@ -192,7 +228,7 @@ const fetchAndStoreVehicleData = async (
     paymentId: paymentId,
     data: dataMain,
     dateTime: currentDateTime,
-    registrationNumber: registrationNumber,
+    vehicleFreeData: vehicleFreeData,
   });
   console.log("Order successfully written to database");
 };
