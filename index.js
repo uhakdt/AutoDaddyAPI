@@ -64,7 +64,7 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
 app.get("/api/v1/chatgpt", async (req, res) => {});
 
 app.post("/api/v1/create-payment-intent", async (req, res) => {
-  const { price, vehicleFreeData } = req.body;
+  const { email, price, vehicleFreeData } = req.body;
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: price,
@@ -72,6 +72,7 @@ app.post("/api/v1/create-payment-intent", async (req, res) => {
     automatic_payment_methods: {
       enabled: true,
     },
+    receipt_email: email,
     metadata: {
       registrationNumber: vehicleFreeData.registrationNumber,
       taxStatus: vehicleFreeData.taxStatus,
@@ -231,6 +232,10 @@ const fetchAndStoreVehicleData = async (
   });
   console.log("Order successfully written to database");
 };
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 const port = 4242;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
