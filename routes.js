@@ -1,4 +1,5 @@
 const app = require("./express");
+const { db, storage } = require("./firebase");
 const { stripe, endpointSecret } = require("./stripe");
 const axios = require("axios");
 const fetchAndStoreVehicleData = require("./functions/fetchAndStore");
@@ -123,6 +124,41 @@ app.post("/api/v1/webhook", (req, res) => {
     }
     default:
       return res.status(400).end();
+  }
+});
+
+app.post("/api/v1/download-report", async (req, res) => {
+  try {
+    console.log("download-report endpoint hit");
+    const { orderId, vehicleRegMark, userId } = req.body;
+
+    const orderSnapshot = await db.collection("orders").doc(orderId).get();
+
+    if (!orderSnapshot.exists) {
+      return res.status(404).send("Order not found");
+    }
+
+    const order = orderSnapshot.data();
+
+    // Check if this order belongs to the authenticated user
+    if (order.userId !== userId) {
+      return res.status(403).send("This order does not belong to you");
+    }
+
+    // Create file path
+    const filePath = `user_files/${userId}/${vehicleRegMark}_${orderId}.pdf`;
+
+    // Create signed URL
+    const bucket = storage.bucket();
+    const [url] = await bucket.file(filePath).getSignedUrl({
+      action: "read",
+      expires: Date.now() + 1000 * 60 * 60, // 1 hour
+    });
+
+    res.json({ url });
+  } catch (error) {
+    console.error("Error getting download URL:", error);
+    res.status(500).send("Error getting download URL");
   }
 });
 
