@@ -166,6 +166,7 @@ app.post("/api/v1/download-report", async (req, res) => {
 
 app.post("/api/v1/email-report", async (req, res) => {
   try {
+    console.log("email-report endpoint hit");
     const { orderId, vehicleRegMark, userId, email } = req.body;
 
     const orderSnapshot = await db.collection("orders").doc(orderId).get();
@@ -186,8 +187,14 @@ app.post("/api/v1/email-report", async (req, res) => {
     });
 
     sendEmail(email, orderId, url)
-      .then(() => res.status(200).send("Email sent successfully"))
-      .catch(() => res.status(500).send("Error sending email"));
+      .then(() => {
+        res.status(200).json({ message: "Email sent successfully" });
+      })
+      .catch((error) => {
+        res
+          .status(500)
+          .json({ message: "Error sending email", error: error.toString() });
+      });
   } catch (error) {
     console.error("Error sending email:", error);
     res.status(500).send("Error sending email: ", error);
