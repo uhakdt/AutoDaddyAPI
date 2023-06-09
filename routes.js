@@ -166,7 +166,6 @@ app.post("/api/v1/download-report", async (req, res) => {
 
 app.post("/api/v1/email-report", async (req, res) => {
   try {
-    console.log("email-report endpoint hit");
     const { orderId, vehicleRegMark, userId, email } = req.body;
 
     const orderSnapshot = await db.collection("orders").doc(orderId).get();
