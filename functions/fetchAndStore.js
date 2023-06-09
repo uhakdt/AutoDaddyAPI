@@ -90,7 +90,7 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
 
     // Markdown to PDF
     let markdown = fs.readFileSync("./markdown-sample.md", "utf8");
-    let yourVariable = "Bismillahir Rahmani Rahim";
+    let yourVariable = "﷽";
     let markdownText = markdown.replace("An h1 header", yourVariable);
 
     // Create stream for PDF

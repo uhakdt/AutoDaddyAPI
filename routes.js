@@ -3,6 +3,8 @@ const { db, storage } = require("./firebase");
 const { stripe, endpointSecret } = require("./stripe");
 const axios = require("axios");
 const fetchAndStoreVehicleData = require("./functions/fetchAndStore");
+const { sendEmail } = require("./email");
+const e = require("express");
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -159,6 +161,36 @@ app.post("/api/v1/download-report", async (req, res) => {
   } catch (error) {
     console.error("Error getting download URL:", error);
     res.status(500).send("Error getting download URL");
+  }
+});
+
+app.post("/api/v1/email-report", async (req, res) => {
+  try {
+    const { orderId, vehicleRegMark, userId, email } = req.body;
+
+    const orderSnapshot = await db.collection("orders").doc(orderId).get();
+    if (!orderSnapshot.exists) {
+      return res.status(404).send("Order not found");
+    }
+
+    const order = orderSnapshot.data();
+    if (order.userId !== userId) {
+      return res.status(403).send("This order does not belong to you");
+    }
+
+    const filePath = `user_files/${userId}/${vehicleRegMark}_${orderId}.pdf`;
+    const bucket = storage.bucket();
+    const [url] = await bucket.file(filePath).getSignedUrl({
+      action: "read",
+      expires: Date.now() + 1000 * 60 * 60,
+    });
+
+    sendEmail(email, orderId, url)
+      .then(() => res.status(200).send("Email sent successfully"))
+      .catch(() => res.status(500).send("Error sending email"));
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).send("Error sending email: ", error);
   }
 });
 
