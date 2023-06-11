@@ -31,6 +31,7 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
     })
     .catch(function (error) {
       console.log(error);
+      res.status(404).send({ message: "Registration number not found" }); // Send a 404 status when error
     });
   console.log("vehicledata/free endpoint hit");
 });
