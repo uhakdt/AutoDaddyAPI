@@ -7,7 +7,7 @@ const { sendEmail } = require("./email");
 const e = require("express");
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("﷽");
 });
 
 app.get("/api/v1/chatgpt", async (req, res) => {});
