@@ -11,7 +11,7 @@ const fetchAndStoreVehicleData = async (
   paymentId,
   ukvdApiKey
 ) => {
-  let packages = ["VehicleAndMotHistory", "VdiCheckFull"];
+  let packages = ["VehicleAndMotHistory", "VdiCheckFull", "VehicleImageData"];
   let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
 
   const fetchData = async (packageName, vehicleRegMark, ukvdApiKey) => {
@@ -59,13 +59,41 @@ const fetchAndStoreVehicleData = async (
   const userDoc = user.docs[0];
   const uid = userDoc.get("uid");
 
-  const dataMain = await fetchAllData(packages, vehicleRegMark, ukvdApiKey);
-
   const orderId = uuidv4();
 
   const orderDoc = db.collection("orders").doc(orderId);
 
   const currentDateTime = new Date().toISOString();
+  const bucket = storage.bucket();
+
+  const downloadImage = async (url, destination) => {
+    const response = await axios({
+      url,
+      responseType: "stream",
+    });
+    await response.data.pipe(bucket.file(destination).createWriteStream());
+  };
+
+  const fetchAndStoreAllImages = async (imageList, orderId, userId) => {
+    for (let i = 0; i < imageList.length; i++) {
+      const imageUrl = imageList[i].ImageUrl;
+      const fileName = `${orderId}_image_${i}.jpg`;
+      const filePath = `user_files/${userId}/car_images/${fileName}`;
+      await downloadImage(imageUrl, filePath);
+    }
+  };
+
+  const dataMain = await fetchAllData(packages, vehicleRegMark, ukvdApiKey);
+
+  const imageDetailsList =
+    dataMain.VehicleImageData.VehicleImages.ImageDetailsList;
+  if (imageDetailsList && imageDetailsList.length > 0) {
+    dataMain.VehicleImages = await fetchAndStoreAllImages(
+      imageDetailsList,
+      orderId,
+      uid
+    );
+  }
 
   await orderDoc.set({
     orderId: orderId,
@@ -104,7 +132,7 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
 
     // Create writable stream to Firebase storage
     const bucket = storage.bucket();
-    const filePath = `user_files/${userId}/${filename}`; // Include the userId in the file path
+    const filePath = `user_files/${userId}/reports/${filename}`;
     const file = bucket.file(filePath);
     const writeStream = file.createWriteStream({
       metadata: {
@@ -131,7 +159,7 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
       "Error occurred while creating the PDF or initiating upload:",
       error
     );
-    throw error; // Rethrow the error if you want it to propagate
+    throw error;
   }
 };
 
