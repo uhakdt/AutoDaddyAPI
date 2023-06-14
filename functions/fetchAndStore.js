@@ -15,24 +15,29 @@ const fetchAndStoreVehicleData = async (
   let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
 
   const fetchData = async (packageName, vehicleRegMark, ukvdApiKey) => {
-    const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${ukvdApiKey}`;
-    const response = await axios.get(url);
+    try {
+      const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${ukvdApiKey}`;
+      const response = await axios.get(url);
 
-    if (response.status !== 200) {
-      throw new Error(`API response was not ok. Status: ${response.status}`);
+      if (response.status !== 200) {
+        throw new Error(`API response was not ok. Status: ${response.status}`);
+      }
+
+      if (response.data.Response.StatusCode === "KeyInvalid") {
+        throw new Error(
+          "Invalid VRM. Please provide a valid vehicle registration mark"
+        );
+      }
+
+      if (response.data.Response.StatusCode !== "Success") {
+        throw new Error(`API error: ${response.data.Response.StatusMessage}`);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching data from UK Vehicle Data:", error);
+      throw error;
     }
-
-    if (response.data.Response.StatusCode === "KeyInvalid") {
-      throw new Error(
-        "Invalid VRM. Please provide a valid vehicle registration mark"
-      );
-    }
-
-    if (response.data.Response.StatusCode !== "Success") {
-      throw new Error(`API error: ${response.data.Response.StatusMessage}`);
-    }
-
-    return response.data;
   };
 
   const fetchAllData = async (packages, vehicleRegMark, ukvdApiKey) => {
@@ -67,11 +72,16 @@ const fetchAndStoreVehicleData = async (
   const bucket = storage.bucket();
 
   const downloadImage = async (url, destination) => {
-    const response = await axios({
-      url,
-      responseType: "stream",
-    });
-    await response.data.pipe(bucket.file(destination).createWriteStream());
+    try {
+      const response = await axios({
+        url,
+        responseType: "stream",
+      });
+      await response.data.pipe(bucket.file(destination).createWriteStream());
+    } catch (error) {
+      console.error(`Error downloading image from URL "${url}":`, error);
+      throw error;
+    }
   };
 
   const fetchAndStoreAllImages = async (imageList, orderId, userId) => {
@@ -79,36 +89,44 @@ const fetchAndStoreVehicleData = async (
       const imageUrl = imageList[i].ImageUrl;
       const fileName = `${orderId}_image_${i}.jpg`;
       const filePath = `user_files/${userId}/car_images/${fileName}`;
-      await downloadImage(imageUrl, filePath);
+      try {
+        await downloadImage(imageUrl, filePath);
+      } catch (error) {
+        console.error(`Error downloading and storing image ${i + 1}:`, error);
+        throw error;
+      }
     }
   };
 
   const dataMain = await fetchAllData(packages, vehicleRegMark, ukvdApiKey);
 
-  const imageDetailsList =
-    dataMain.VehicleImageData.VehicleImages.ImageDetailsList;
-  if (imageDetailsList && imageDetailsList.length > 0) {
-    dataMain.VehicleImages = await fetchAndStoreAllImages(
-      imageDetailsList,
-      orderId,
-      uid
-    );
-  }
+  await fetchAndStoreAllImages(
+    dataMain.VehicleImageData.VehicleImages.ImageDetailsList,
+    orderId,
+    uid
+  );
 
-  await orderDoc.set({
-    orderId: orderId,
-    userId: uid,
-    paymentId: paymentId,
-    data: dataMain,
-    dateTime: currentDateTime,
-    vehicleFreeData: vehicleFreeData,
-  });
+  await orderDoc
+    .set({
+      orderId: orderId,
+      userId: uid,
+      paymentId: paymentId,
+      data: dataMain,
+      dateTime: currentDateTime,
+      vehicleFreeData: vehicleFreeData,
+    })
+    .catch((error) => {
+      console.error("Error writing order to database:", error);
+      throw error;
+    });
+
   console.log("Order successfully written to database");
 
   try {
     await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
   } catch (error) {
     console.error("Error occurred while creating or uploading the PDF:", error);
+    throw error;
   }
 };
 

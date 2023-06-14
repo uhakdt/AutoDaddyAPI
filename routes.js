@@ -149,7 +149,7 @@ app.post("/api/v1/download-report", async (req, res) => {
     }
 
     // Create file path
-    const filePath = `user_files/${userId}/${vehicleRegMark}_${orderId}.pdf`;
+    const filePath = `user_files/${userId}/reports/${vehicleRegMark}_${orderId}.pdf`;
 
     // Create signed URL
     const bucket = storage.bucket();
@@ -179,7 +179,7 @@ app.post("/api/v1/email-report", async (req, res) => {
       return res.status(403).send("This order does not belong to you");
     }
 
-    const filePath = `user_files/${userId}/${vehicleRegMark}_${orderId}.pdf`;
+    const filePath = `user_files/${userId}/reports/${vehicleRegMark}_${orderId}.pdf`;
     const bucket = storage.bucket();
     const [url] = await bucket.file(filePath).getSignedUrl({
       action: "read",
