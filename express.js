@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.use((req, res, next) => {
     },
   })(req, res, next);
 });
+
+app.use("/.well-known", express.static(path.join(__dirname, ".well-known")));
 
 app.use(cors({ origin: process.env["CLIENT_DOMAIN"] }));
 
