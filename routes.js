@@ -144,7 +144,11 @@ app.post("/api/v1/capture-paypal-order", async (req, res) => {
   try {
     const captureData = await capturePayment(orderID);
     res.json(captureData);
-    console.log(captureData);
+    if (captureData.status === "COMPLETED") {
+      console.log("Payment completed");
+    } else {
+      console.log("Payment not completed");
+    }
   } catch (err) {
     res.status(500).send(err.message);
   }

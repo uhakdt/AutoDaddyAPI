@@ -1,13 +1,10 @@
 import fetch from "node-fetch";
 
-const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-const base = "https://api-m.sandbox.paypal.com";
+const { PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_API_URL } = process.env;
 
 export async function createOrder(data) {
-  console.log("Body data", data);
-
   const accessToken = await generateAccessToken();
-  const url = `${base}/v2/checkout/orders`;
+  const url = `${PAYPAL_API_URL}/v2/checkout/orders`;
   const response = await fetch(url, {
     method: "post",
     headers: {
@@ -19,10 +16,10 @@ export async function createOrder(data) {
       purchase_units: [
         {
           amount: {
-            currency_code: "USD",
-            value: data.product.cost,
+            currency_code: "GBP",
+            value: data.cost,
           },
-          description: "Wood Candy Sofa",
+          description: data.description,
         },
       ],
     }),
@@ -33,7 +30,7 @@ export async function createOrder(data) {
 
 export async function capturePayment(orderId) {
   const accessToken = await generateAccessToken();
-  const url = `${base}/v2/checkout/orders/${orderId}/capture`;
+  const url = `${PAYPAL_API_URL}/v2/checkout/orders/${orderId}/capture`;
   const response = await fetch(url, {
     method: "post",
     headers: {
@@ -49,7 +46,7 @@ export async function generateAccessToken() {
   const auth = Buffer.from(PAYPAL_CLIENT_ID + ":" + PAYPAL_SECRET).toString(
     "base64"
   );
-  const response = await fetch(`${base}/v1/oauth2/token`, {
+  const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
     method: "post",
     body: "grant_type=client_credentials",
     headers: {
