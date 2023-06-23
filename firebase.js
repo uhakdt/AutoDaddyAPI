@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+import admin from "firebase-admin";
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -12,7 +12,4 @@ admin.initializeApp({
 const db = admin.firestore();
 const storage = admin.storage();
 
-module.exports = {
-  db,
-  storage,
-};
+export { db, storage };

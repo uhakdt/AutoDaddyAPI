@@ -1,10 +1,9 @@
-const app = require("./express");
-const { db, storage } = require("./firebase");
-const { stripe, endpointSecret } = require("./stripe");
-const axios = require("axios");
-const fetchAndStoreVehicleData = require("./functions/fetchAndStore");
-const { sendEmail } = require("./email");
-const e = require("express");
+import app from "./express.js";
+import { db, storage } from "./firebase.js";
+import { stripe, endpointSecret } from "./stripe.js";
+import axios from "axios";
+import fetchAndStoreVehicleData from "./functions/fetchAndStore.js";
+import sendEmail from "./email.js";
 
 app.get("/", (req, res) => {
   res.send("﷽");
@@ -201,4 +200,4 @@ app.post("/api/v1/email-report", async (req, res) => {
   }
 });
 
-module.exports = app;
+export default app;

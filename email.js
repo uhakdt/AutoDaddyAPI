@@ -1,7 +1,7 @@
-const { google } = require("googleapis");
-const nodemailer = require("nodemailer");
-const fs = require("fs");
-const path = require("path");
+import { google } from "googleapis";
+import nodemailer from "nodemailer";
+import fs from "fs";
+import path from "path";
 
 const oAuth2Client = new google.auth.OAuth2(
   process.env["GCP_GMAIL_CLIENT_ID"],
@@ -52,4 +52,4 @@ const sendEmail = async (email, orderId, url) => {
   }
 };
 
-module.exports = { sendEmail };
+export default sendEmail;

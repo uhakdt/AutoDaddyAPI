@@ -1,9 +1,9 @@
-const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
-const { db, storage } = require("../firebase");
-const fs = require("fs");
-const stream = require("stream");
-const markdownpdf = require("markdown-pdf");
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import { db, storage } from "../firebase.js";
+import fs from "fs";
+import stream from "stream";
+import markdownpdf from "markdown-pdf";
 
 const fetchAndStoreVehicleData = async (
   email,
@@ -181,4 +181,4 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
   }
 };
 
-module.exports = fetchAndStoreVehicleData;
+export default fetchAndStoreVehicleData;

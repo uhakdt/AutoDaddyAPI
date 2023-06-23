@@ -1,11 +1,14 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const path = require("path");
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+dotenv.config();
 
 const app = express();
-
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
@@ -21,8 +24,12 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
+// Here is the fix
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 app.use("/.well-known", express.static(path.join(__dirname, ".well-known")));
 
 app.use(cors({ origin: process.env["CLIENT_DOMAIN"] }));
 
-module.exports = app;
+export default app;
