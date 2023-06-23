@@ -24,7 +24,6 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
-// Here is the fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

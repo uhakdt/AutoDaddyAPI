@@ -4,6 +4,7 @@ import { stripe, endpointSecret } from "./stripe.js";
 import axios from "axios";
 import fetchAndStoreVehicleData from "./functions/fetchAndStore.js";
 import sendEmail from "./email.js";
+import { createOrder, capturePayment } from "./paypal.js";
 
 app.get("/", (req, res) => {
   res.send("﷽");
@@ -126,6 +127,26 @@ app.post("/api/v1/webhook", (req, res) => {
     }
     default:
       return res.status(400).end();
+  }
+});
+
+app.post("/api/v1/create-paypal-order", async (req, res) => {
+  try {
+    const order = await createOrder(req.body);
+    res.json(order);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+app.post("/api/v1/capture-paypal-order", async (req, res) => {
+  const { orderID } = req.body;
+  try {
+    const captureData = await capturePayment(orderID);
+    res.json(captureData);
+    console.log(captureData);
+  } catch (err) {
+    res.status(500).send(err.message);
   }
 });
 
