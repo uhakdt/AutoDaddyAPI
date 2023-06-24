@@ -139,18 +139,48 @@ app.post("/api/v1/create-paypal-order", async (req, res) => {
   }
 });
 
-app.post("/api/v1/capture-paypal-order", async (req, res) => {
-  const { orderID } = req.body;
+app.post("/api/v1/capture-paypal-order", async (req, resMain) => {
+  const { orderID, email, vehicleFreeData } = req.body;
   try {
-    const captureData = await capturePayment(orderID);
-    res.json(captureData);
-    if (captureData.status === "COMPLETED") {
-      console.log("Payment completed");
-    } else {
-      console.log("Payment not completed");
-    }
+    await capturePayment(orderID).then((res) => {
+      if (res.status === "COMPLETED") {
+        const vehicleData = {
+          RegistrationNumber: vehicleFreeData.registrationNumber,
+          TaxStatus: vehicleFreeData.taxStatus,
+          TaxDueDate: vehicleFreeData.taxDueDate,
+          MotStatus: vehicleFreeData.motStatus,
+          Make: vehicleFreeData.make,
+          YearOfManufacture: vehicleFreeData.yearOfManufacture,
+          EngineCapacity: vehicleFreeData.engineCapacity,
+          Co2Emissions: vehicleFreeData.co2Emissions,
+          FuelType: vehicleFreeData.fuelType,
+          MarkedForExport: vehicleFreeData.markedForExport,
+          Colour: vehicleFreeData.colour,
+          TypeApproval: vehicleFreeData.typeApproval,
+          DateOfLastV5CIssued: vehicleFreeData.dateOfLastV5CIssued,
+          MotExpiryDate: vehicleFreeData.motExpiryDate,
+          Wheelplan: vehicleFreeData.wheelplan,
+          MonthOfFirstRegistration: vehicleFreeData.monthOfFirstRegistration,
+        };
+        fetchAndStoreVehicleData(
+          email,
+          vehicleData,
+          orderID,
+          process.env["UKVD_API_KEY"]
+        )
+          .then(() => {
+            resMain.status(200).send("Vehicle data stored");
+          })
+          .catch((err) => {
+            console.error(`Error handling success: ${err}`);
+            resMain.status(500).send(err.message);
+          });
+      } else {
+        resMain.status(500).send("Payment not completed");
+      }
+    });
   } catch (err) {
-    res.status(500).send(err.message);
+    resMain.status(500).send(err.message);
   }
 });
 
