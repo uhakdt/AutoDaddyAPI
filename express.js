@@ -8,6 +8,9 @@ import { dirname } from "path";
 import morgan from "morgan";
 import compression from "compression";
 import rfs from "rotating-file-stream";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import hpp from "hpp";
 
 dotenv.config();
 
@@ -32,33 +35,26 @@ const __dirname = dirname(__filename);
 
 app.use("/.well-known", express.static(path.join(__dirname, ".well-known")));
 
-// Custom log file name format
+// LOGGING
 var pad = (num) => (num > 9 ? "" : "0") + num;
 var generator = (time, index) => {
-  if (!time) time = new Date(); // Use current date if time is not provided
+  if (!time) time = new Date();
 
-  // Log file name: dd-mm-yyyy.log
   var month = pad(time.getMonth() + 1);
   var day = pad(time.getDate());
   var year = time.getFullYear();
   return `${day}-${month}-${year}.log`;
 };
-
-// create a rotating write stream
 var accessLogStream = rfs.createStream(generator, {
-  interval: "1d", // rotate daily
+  interval: "1d",
   path: path.join(__dirname, "logs"),
-  maxSize: "10M", // (10 * 1MB) cap at 10 files
-  maxFiles: 10, // cap at 10 files
+  maxSize: "10M",
+  maxFiles: 10,
 });
-
-// Custom morgan token
 morgan.token("datetime", () => {
   const currentDateTime = new Date().toLocaleString();
   return currentDateTime;
 });
-
-// Setup the logger
 app.use(
   morgan("[:datetime] :status :url :method :response-time ms", {
     stream: accessLogStream,
@@ -66,6 +62,17 @@ app.use(
 );
 
 app.use(compression());
+
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
+
+app.use(hpp());
 
 app.use(cors({ origin: process.env["CLIENT_DOMAIN"] }));
 
