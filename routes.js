@@ -30,10 +30,8 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
       res.send(response.data);
     })
     .catch(function (error) {
-      console.log(error);
       res.status(404).send({ message: "Registration number not found" }); // Send a 404 status when error
     });
-  console.log("vehicledata/free endpoint hit");
 });
 
 app.post("/api/v1/create-payment-intent", async (req, res) => {
@@ -72,7 +70,6 @@ app.post("/api/v1/create-payment-intent", async (req, res) => {
 });
 
 app.post("/api/v1/webhook", (req, res) => {
-  console.log("webhook endpoint hit");
   const sig = req.headers["stripe-signature"];
   let event;
 
@@ -186,7 +183,6 @@ app.post("/api/v1/capture-paypal-order", async (req, resMain) => {
 
 app.post("/api/v1/download-report", async (req, res) => {
   try {
-    console.log("download-report endpoint hit");
     const { orderId, vehicleRegMark, userId } = req.body;
 
     const orderSnapshot = await db.collection("orders").doc(orderId).get();

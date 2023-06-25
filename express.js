@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -28,6 +29,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.use("/.well-known", express.static(path.join(__dirname, ".well-known")));
+
+morgan.token("datetime", () => {
+  const currentDateTime = new Date().toLocaleString();
+  return currentDateTime;
+});
+app.use(morgan("[:datetime] :status :url :method :response-time ms"));
 
 app.use(cors({ origin: process.env["CLIENT_DOMAIN"] }));
 

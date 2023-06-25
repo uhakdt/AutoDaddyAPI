@@ -120,8 +120,6 @@ const fetchAndStoreVehicleData = async (
       throw error;
     });
 
-  console.log("Order successfully written to database");
-
   try {
     await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
   } catch (error) {
@@ -170,8 +168,6 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
         reject(error);
       });
     });
-
-    console.log("PDF successfully uploaded to Firebase Storage");
   } catch (error) {
     console.error(
       "Error occurred while creating the PDF or initiating upload:",
