@@ -7,16 +7,11 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const pad = (num) => (num > 9 ? "" : "0") + num;
-
-const generator = (time, index) => {
+const generator = (time) => {
   if (!time) time = new Date();
-
-  const month = pad(time.getMonth() + 1);
-  const day = pad(time.getDate());
-  const year = time.getFullYear();
-
-  return `${day}-${month}-${year}.log`;
+  return `${time.getDate()}-${(time.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${time.getFullYear()}.log`;
 };
 
 const accessLogStream = rfs.createStream(generator, {
@@ -26,10 +21,7 @@ const accessLogStream = rfs.createStream(generator, {
   maxFiles: 10,
 });
 
-morgan.token("datetime", () => {
-  const currentDateTime = new Date().toLocaleString();
-  return currentDateTime;
-});
+morgan.token("datetime", () => new Date().toLocaleString());
 
 const logger = morgan("[:datetime] :status :url :method :response-time ms", {
   stream: accessLogStream,
