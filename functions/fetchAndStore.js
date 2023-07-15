@@ -106,6 +106,26 @@ const fetchAndStoreVehicleData = async (
     uid
   );
 
+  const gptBody = {
+    dateTime: currentDateTime,
+    data: dataMain,
+    orderId: orderId,
+    paymentId: paymentId,
+    vehicleFreeData: vehicleFreeData,
+    userId: uid,
+  };
+
+  const gptResponse = await axios
+    .post("https://autodaddy-gpt.uhakdt.repl.co/chat", gptBody)
+    .then((response) => {
+      console.log(data);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error sending data to GPT-3:", error);
+      throw error;
+    });
+
   await orderDoc
     .set({
       orderId: orderId,
@@ -114,6 +134,7 @@ const fetchAndStoreVehicleData = async (
       data: dataMain,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
+      gptResponse: gptResponse,
     })
     .catch((error) => {
       console.error("Error writing order to database:", error);
