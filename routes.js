@@ -7,6 +7,7 @@ import sendEmail from "./email.js";
 import { createOrder, capturePayment } from "./paypal.js";
 
 app.get("/", (req, res) => {
+  console.log("﷽");
   res.send("﷽");
 });
 
