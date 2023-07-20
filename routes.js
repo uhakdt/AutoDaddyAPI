@@ -6,14 +6,13 @@ import fetchAndStoreVehicleData from "./functions/fetchAndStore.js";
 import sendEmail from "./email.js";
 import { createOrder, capturePayment } from "./paypal.js";
 
-app.get("/", (req, res) => {
-  console.log("﷽");
-  res.send("﷽");
+app.get("/api/v1", (req, res) => {
+  console.log("ﷺ ﷽");
+  res.send("ﷺ ﷽");
 });
 
-app.get("/api/v1/chatgpt", async (req, res) => {});
-
-app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
+// DVLA - Vehicle Free Data
+app.post("/api/v1/dvla/:registrationNumber", async (req, res) => {
   var config = {
     method: "post",
     url: process.env["VEHICLE_FREE_DATA_URL"],
@@ -35,7 +34,138 @@ app.post("/api/v1/vehicledata/free/:registrationNumber", async (req, res) => {
     });
 });
 
-app.post("/api/v1/create-payment-intent", async (req, res) => {
+// ONE AUTO API - UK Vehicle Data
+app.get("/api/v1/oneautoapi/ukvd/:registrationNumber", async (req, res) => {
+  console.log("ﷺ ﷽");
+  var config = {
+    method: "get",
+    url:
+      process.env["ONE_AUTO_API_URL"] +
+      `/ukvehicledata/vehicleandmodeldetailsfromvrm?vehicle_registration_mark=${req.params.registrationNumber.toString()}`,
+    headers: {
+      "x-api-key": process.env["ONE_AUTO_API_KEY"],
+      "Content-Type": "application/json",
+    },
+  };
+
+  axios(config)
+    .then(function (response) {
+      res.send(response.data);
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.status(404).send({ message: "Registration number not found" });
+    });
+});
+
+// ONE AUTO API - Experian
+app.get("/api/v1/oneautoapi/experian/:registrationNumber", async (req, res) => {
+  console.log("ﷺ ﷽");
+  var config = {
+    method: "get",
+    url:
+      process.env["ONE_AUTO_API_URL"] +
+      `/experian/autocheck/v2?vehicle_registration_mark=${req.params.registrationNumber.toString()}`,
+    headers: {
+      "x-api-key": process.env["ONE_AUTO_API_KEY"],
+      "Content-Type": "application/json",
+    },
+  };
+
+  axios(config)
+    .then(function (response) {
+      res.send(response.data);
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.status(404).send({ message: "Registration number not found" });
+    });
+});
+
+// ONE AUTO API - Car Guide - Salvage Check
+app.get(
+  "/api/v1/oneautoapi/carguide/salvagecheck/:registrationNumber",
+  async (req, res) => {
+    console.log("ﷺ ﷽");
+    var config = {
+      method: "get",
+      url:
+        process.env["ONE_AUTO_API_URL"] +
+        `/carguide/salvagecheck?vehicle_registration_mark=${req.params.registrationNumber.toString()}`,
+      headers: {
+        "x-api-key": process.env["ONE_AUTO_API_KEY"],
+        "Content-Type": "application/json",
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        res.send(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+        res.status(404).send({ message: "Registration number not found" });
+      });
+  }
+);
+
+// ONE AUTO API - Car Guide - MOT
+app.get(
+  "/api/v1/oneautoapi/carguide/mot/:registrationNumber",
+  async (req, res) => {
+    console.log("ﷺ ﷽");
+    var config = {
+      method: "get",
+      url:
+        process.env["ONE_AUTO_API_URL"] +
+        `/carguide/mothistoryandpredictions?vehicle_registration_mark=${req.params.registrationNumber.toString()}`,
+      headers: {
+        "x-api-key": process.env["ONE_AUTO_API_KEY"],
+        "Content-Type": "application/json",
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        res.send(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+        res.status(404).send({ message: "Registration number not found" });
+      });
+  }
+);
+
+// ONE AUTO API - Autotrader - Valuation
+app.get(
+  "/api/v1/oneautoapi/autotrader/valuation/:registrationNumber/:currentMileage/:vehicleCondition",
+  async (req, res) => {
+    console.log("ﷺ ﷽");
+    var config = {
+      method: "get",
+      url:
+        process.env["ONE_AUTO_API_URL"] +
+        `/autotrader/valuationfromvrm?vehicle_registration_mark=${req.params.registrationNumber.toString()}&current_mileage=${req.params.currentMileage.toString()}&vehicle_condition=${req.params.vehicleCondition.toString()}`,
+      headers: {
+        "x-api-key": process.env["ONE_AUTO_API_KEY"],
+        "Content-Type": "application/json",
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        res.send(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+        res.status(404).send({ message: "Registration number not found" });
+      });
+  }
+);
+
+// STRIPE API - Create Payment Intent
+app.post("/api/v1/stripe/create-payment-intent", async (req, res) => {
+  console.log("ﷺ ﷽");
   const { email, price, vehicleFreeData } = req.body;
 
   const paymentIntent = await stripe.paymentIntents.create({
@@ -70,7 +200,9 @@ app.post("/api/v1/create-payment-intent", async (req, res) => {
   });
 });
 
-app.post("/api/v1/webhook", (req, res) => {
+// STRIPE API - Webhook
+app.post("/api/v1/stripe/webhook", (req, res) => {
+  console.log("ﷺ ﷽");
   const sig = req.headers["stripe-signature"];
   let event;
 
@@ -128,7 +260,9 @@ app.post("/api/v1/webhook", (req, res) => {
   }
 });
 
-app.post("/api/v1/create-paypal-order", async (req, res) => {
+// PAYPAL API - Create Order
+app.post("/api/v1/paypal/create-paypal-order", async (req, res) => {
+  console.log("ﷺ ﷽");
   try {
     const order = await createOrder(req.body);
     res.json(order);
@@ -137,7 +271,9 @@ app.post("/api/v1/create-paypal-order", async (req, res) => {
   }
 });
 
-app.post("/api/v1/capture-paypal-order", async (req, resMain) => {
+// PAYPAL API - Capture Order
+app.post("/api/v1/paypal/capture-paypal-order", async (req, resMain) => {
+  console.log("ﷺ ﷽");
   const { orderID, email, vehicleFreeData } = req.body;
   try {
     await capturePayment(orderID).then((res) => {
@@ -182,7 +318,9 @@ app.post("/api/v1/capture-paypal-order", async (req, resMain) => {
   }
 });
 
-app.post("/api/v1/download-report", async (req, res) => {
+// FIREBASE API - Download Report
+app.post("/api/v1/firebase/download-report", async (req, res) => {
+  console.log("ﷺ ﷽");
   try {
     const { orderId, vehicleRegMark, userId } = req.body;
 
@@ -216,6 +354,7 @@ app.post("/api/v1/download-report", async (req, res) => {
   }
 });
 
+// EMAIL API - Send Report
 app.post("/api/v1/email-report", async (req, res) => {
   try {
     const { orderId, vehicleRegMark, userId, email } = req.body;
@@ -251,5 +390,7 @@ app.post("/api/v1/email-report", async (req, res) => {
     res.status(500).send("Error sending email: ", error);
   }
 });
+
+app.post("/api/v1/");
 
 export default app;
