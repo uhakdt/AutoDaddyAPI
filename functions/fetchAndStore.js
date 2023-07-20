@@ -115,16 +115,16 @@ const fetchAndStoreVehicleData = async (
     userId: uid,
   };
 
-  const gptResponse = await axios
-    .post("https://autodaddy-gpt.uhakdt.repl.co/chat", gptBody)
-    .then((response) => {
-      console.log(data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error sending data to GPT-3:", error);
-      throw error;
-    });
+  // const gptResponse = await axios
+  //   .post("https://autodaddy-gpt.uhakdt.repl.co/chat", gptBody)
+  //   .then((response) => {
+  //     console.log(data);
+  //     return response.data;
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error sending data to GPT-3:", error);
+  //     throw error;
+  //   });
 
   await orderDoc
     .set({
@@ -134,7 +134,158 @@ const fetchAndStoreVehicleData = async (
       data: dataMain,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
-      gptResponse: gptResponse,
+      // gptResponse: gptResponse,
+    })
+    .catch((error) => {
+      console.error("Error writing order to database:", error);
+      throw error;
+    });
+
+  try {
+    await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
+  } catch (error) {
+    console.error("Error occurred while creating or uploading the PDF:", error);
+    throw error;
+  }
+};
+
+const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
+  let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
+  let services = [
+    `/ukvehicledata/vehicleandmodeldetailsfromvrm?vehicle_registration_mark=${vehicleRegMark}`,
+    `/experian/autocheck/v2?vehicle_registration_mark=${vehicleRegMark}`,
+    `/carguide/salvagecheck?vehicle_registration_mark=${vehicleRegMark}`,
+    `/carguide/mothistoryandpredictions?vehicle_registration_mark=${vehicleRegMark}`,
+  ];
+
+  const fetchData = async (service) => {
+    try {
+      var config = {
+        method: "get",
+        url: process.env["ONE_AUTO_API_URL"] + service,
+        headers: {
+          "x-api-key": process.env["ONE_AUTO_API_KEY"],
+          "Content-Type": "application/json",
+        },
+      };
+
+      const response = await axios(config);
+
+      if (response.status !== 200) {
+        throw new Error(`API response was not ok. Status: ${response.status}`);
+      }
+
+      return response.data.result;
+    } catch (error) {
+      console.error(
+        `Error fetching data from One Auto API for ${service}. Error message: ${error.message}`
+      );
+      throw error;
+    }
+  };
+
+  const fetchAllData = async (services) => {
+    const data = await Promise.all(
+      services.map((service) => fetchData(service))
+    );
+
+    const dataObject = {};
+    for (let i = 0; i < services.length; i++) {
+      if (services[i].includes("ukvehicledata")) {
+        dataObject["ukvehicledata"] = data[i];
+      } else if (services[i].includes("experian")) {
+        dataObject["experian"] = data[i];
+      } else if (services[i].includes("mot")) {
+        dataObject["mot"] = data[i];
+      } else if (services[i].includes("salvage")) {
+        dataObject["salvage"] = data[i];
+      } else {
+        throw new Error(`Unknown service: ${services[i]}`);
+      }
+    }
+
+    return dataObject;
+  };
+
+  const user = await db.collection("users").where("email", "==", email).get();
+
+  if (user.empty) {
+    throw new Error(`No user found with email: ${email}`);
+  }
+
+  const userDoc = user.docs[0];
+  const uid = userDoc.get("uid");
+
+  const orderId = uuidv4();
+
+  const orderDoc = db.collection("orders").doc(orderId);
+
+  const currentDateTime = new Date().toISOString();
+  const bucket = storage.bucket();
+
+  // const downloadImage = async (url, destination) => {
+  //   try {
+  //     const response = await axios({
+  //       url,
+  //       responseType: "stream",
+  //     });
+  //     await response.data.pipe(bucket.file(destination).createWriteStream());
+  //   } catch (error) {
+  //     console.error(`Error downloading image from URL "${url}":`, error);
+  //     throw error;
+  //   }
+  // };
+
+  const fetchAndStoreAllImages = async (imageList, orderId, userId) => {
+    for (let i = 0; i < imageList.length; i++) {
+      const imageUrl = imageList[i].ImageUrl;
+      const fileName = `${orderId}_image_${i}.jpg`;
+      const filePath = `user_files/${userId}/car_images/${fileName}`;
+      try {
+        await downloadImage(imageUrl, filePath);
+      } catch (error) {
+        console.error(`Error downloading and storing image ${i + 1}:`, error);
+        throw error;
+      }
+    }
+  };
+
+  const dataMain = await fetchAllData(services);
+  // await fetchAndStoreAllImages(
+  //   dataMain.VehicleImageData.VehicleImages.ImageDetailsList,
+  //   orderId,
+  //   uid
+  // );
+
+  // const gptBody = {
+  //   dateTime: currentDateTime,
+  //   data: dataMain,
+  //   orderId: orderId,
+  //   paymentId: paymentId,
+  //   vehicleFreeData: vehicleFreeData,
+  //   userId: uid,
+  // };
+
+  // const gptResponse = await axios
+  //   .post("https://autodaddy-gpt.uhakdt.repl.co/chat", gptBody)
+  //   .then((response) => {
+  //     console.log(data);
+  //     return response.data;
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error sending data to GPT-3:", error);
+  //     throw error;
+  //   });
+
+  await orderDoc
+    .set({
+      orderId: orderId,
+      userId: uid,
+      paymentId: paymentId,
+      data: dataMain,
+      dateTime: currentDateTime,
+      vehicleFreeData: vehicleFreeData,
+      // gptResponse: gptResponse,
     })
     .catch((error) => {
       console.error("Error writing order to database:", error);
@@ -198,4 +349,4 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
   }
 };
 
-export default fetchAndStoreVehicleData;
+export { fetchAndStoreVehicleData, fetchAndStoreOneAutoAPI };

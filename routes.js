@@ -2,7 +2,10 @@ import app from "./express.js";
 import { db, storage } from "./firebase.js";
 import { stripe, endpointSecret } from "./stripe.js";
 import axios from "axios";
-import fetchAndStoreVehicleData from "./functions/fetchAndStore.js";
+import {
+  fetchAndStoreVehicleData,
+  fetchAndStoreOneAutoAPI,
+} from "./functions/fetchAndStore.js";
 import sendEmail from "./email.js";
 import { createOrder, capturePayment } from "./paypal.js";
 
@@ -240,12 +243,7 @@ app.post("/api/v1/stripe/webhook", (req, res) => {
 
       const paymentId = event["data"]["object"]["id"];
 
-      fetchAndStoreVehicleData(
-        email,
-        vehicleFreeData,
-        paymentId,
-        process.env["UKVD_API_KEY"]
-      )
+      fetchAndStoreOneAutoAPI(email, vehicleFreeData, paymentId)
         .then(() => {
           res.json({ received: true });
         })
