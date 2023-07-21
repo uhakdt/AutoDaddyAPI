@@ -4,7 +4,7 @@ import sendEmail from "../email.js";
 const router = express.Router();
 
 // EMAIL API - Send Report
-router.post("/report", async (req, res) => {
+router.post("/send-report", async (req, res) => {
   try {
     const { orderId, vehicleRegMark, userId, email } = req.body;
 
