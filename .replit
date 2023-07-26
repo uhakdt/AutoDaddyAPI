@@ -84,3 +84,9 @@ pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
 
 [languages.javascript.languageServer]
 start = "typescript-language-server --stdio"
+
+[deployment]
+run = ["sh", "-c", "npm start"]
+ignorePorts = false
+deploymentTarget = "gce"
+build = ["sh", "-c", "npm install -g nodemon; npm install; "]
