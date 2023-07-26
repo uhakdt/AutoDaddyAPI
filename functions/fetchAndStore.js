@@ -5,19 +5,17 @@ import fs from "fs";
 import stream from "stream";
 import markdownpdf from "markdown-pdf";
 
-const fetchAndStoreVehicleData = async (
-  email,
-  vehicleFreeData,
-  paymentId,
-  ukvdApiKey
-) => {
-  let packages = ["VehicleAndMotHistory", "VdiCheckFull", "VehicleImageData"];
+const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
+  let packageUrls = [
+    process.env["UKVD_API_URL_VEHICLE_AND_MOT_HISTORY"],
+    process.env["UKVD_API_URL_VDI_CHECK_FULL"],
+    process.env["UKVD_API_URL_VEHICLE_IMAGE_DATA"],
+  ];
   let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
 
-  const fetchData = async (packageName, vehicleRegMark, ukvdApiKey) => {
+  const fetchData = async (packageUrl, vehicleRegMark) => {
     try {
-      const url = `https://uk1.ukvehicledata.co.uk/api/datapackage/${packageName}?v=2&api_nullitems=1&key_vrm=${vehicleRegMark}&auth_apikey=${ukvdApiKey}`;
-      const response = await axios.get(url);
+      const response = await axios.get(packageUrl + vehicleRegMark);
 
       if (response.status !== 200) {
         throw new Error(`API response was not ok. Status: ${response.status}`);
@@ -40,18 +38,23 @@ const fetchAndStoreVehicleData = async (
     }
   };
 
-  const fetchAllData = async (packages, vehicleRegMark, ukvdApiKey) => {
+  const fetchAllData = async (packageUrls, vehicleRegMark) => {
     const data = await Promise.all(
-      packages.map((packageName) =>
-        fetchData(packageName, vehicleRegMark, ukvdApiKey)
-      )
+      packageUrls.map((packageUrl) => fetchData(packageUrl, vehicleRegMark))
     );
 
     const dataObject = {};
-    for (let i = 0; i < packages.length; i++) {
-      dataObject[packages[i]] = data[i].Response.DataItems;
+    for (let i = 0; i < packageUrls.length; i++) {
+      if (packageUrls[i].includes("VehicleAndMotHistory")) {
+        dataObject["VehicleAndMotHistory"] = data[i].Response.DataItems;
+      } else if (packageUrls[i].includes("VdiCheckFull")) {
+        dataObject["VdiCheckFull"] = data[i].Response.DataItems;
+      } else if (packageUrls[i].includes("VehicleImageData")) {
+        dataObject["VehicleImages"] = data[i].Response.DataItems;
+      }
     }
 
+    console.log("All data fetched successfully.");
     return dataObject;
   };
 
@@ -98,10 +101,10 @@ const fetchAndStoreVehicleData = async (
     }
   };
 
-  const dataMain = await fetchAllData(packages, vehicleRegMark, ukvdApiKey);
+  const dataMain = await fetchAllData(packageUrls, vehicleRegMark);
 
   await fetchAndStoreAllImages(
-    dataMain.VehicleImageData.VehicleImages.ImageDetailsList,
+    dataMain.VehicleImages.VehicleImages.ImageDetailsList,
     orderId,
     uid
   );

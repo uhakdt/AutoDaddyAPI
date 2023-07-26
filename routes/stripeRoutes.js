@@ -1,6 +1,6 @@
 import express from "express";
 import { stripe, endpointSecret } from "../stripe.js";
-import { fetchAndStoreOneAutoAPI } from "../functions/fetchAndStore.js";
+import { fetchAndStoreVehicleData } from "../functions/fetchAndStore.js";
 
 const router = express.Router();
 
@@ -81,7 +81,7 @@ router.post("/webhook", (req, res) => {
 
       const paymentId = event["data"]["object"]["id"];
 
-      fetchAndStoreOneAutoAPI(email, vehicleFreeData, paymentId)
+      fetchAndStoreVehicleData(email, vehicleFreeData, paymentId)
         .then(() => {
           res.json({ received: true });
         })

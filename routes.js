@@ -1,6 +1,7 @@
 import app from "./express.js";
 
 import dvlaRoutes from "./routes/dvlaRoutes.js";
+import ukvdRoutes from "./routes/ukvdRoutes.js";
 import oneAutoApiRoutes from "./routes/oneAutoApiRoutes.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import paypalRoutes from "./routes/paypalRoutes.js";
@@ -13,6 +14,7 @@ app.get("/api/v1", (req, res) => {
 });
 
 app.use("/api/v1/dvla", dvlaRoutes);
+app.use("/api/v1/ukvd", ukvdRoutes);
 app.use("/api/v1/oneautoapi", oneAutoApiRoutes);
 app.use("/api/v1/stripe", stripeRoutes);
 app.use("/api/v1/paypal", paypalRoutes);
