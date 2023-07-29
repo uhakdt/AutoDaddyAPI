@@ -13,6 +13,19 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
   ];
   let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
 
+  const replaceUndefinedWithEmptyString = (obj) => {
+    const keys = Object.keys(obj);
+    keys.forEach((key) => {
+      if (obj[key] && typeof obj[key] === 'object') {
+        replaceUndefinedWithEmptyString(obj[key]);
+      } else if (obj[key] === undefined) {
+        obj[key] = '';
+      }
+    });
+  };
+
+  replaceUndefinedWithEmptyString(vehicleFreeData); // handle undefined values for vehicleFreeData
+
   const fetchData = async (packageUrl, vehicleRegMark) => {
     try {
       const response = await axios.get(packageUrl + vehicleRegMark);
@@ -103,6 +116,8 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
 
   const dataMain = await fetchAllData(packageUrls, vehicleRegMark);
 
+  replaceUndefinedWithEmptyString(dataMain); // handle undefined values for dataMain
+
   await fetchAndStoreAllImages(
     dataMain.VehicleImages.VehicleImages.ImageDetailsList,
     orderId,
@@ -118,17 +133,6 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
     userId: uid,
   };
 
-  // const gptResponse = await axios
-  //   .post("https://autodaddy-gpt.uhakdt.repl.co/chat", gptBody)
-  //   .then((response) => {
-  //     console.log(data);
-  //     return response.data;
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error sending data to GPT-3:", error);
-  //     throw error;
-  //   });
-
   await orderDoc
     .set({
       orderId: orderId,
@@ -137,7 +141,6 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
       data: dataMain,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
-      // gptResponse: gptResponse,
     })
     .catch((error) => {
       console.error("Error writing order to database:", error);
@@ -254,6 +257,9 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
   };
 
   const dataMain = await fetchAllData(services);
+
+  replaceUndefinedWithEmptyString(dataMain); // handle undefined values for dataMain
+
   // await fetchAndStoreAllImages(
   //   dataMain.VehicleImageData.VehicleImages.ImageDetailsList,
   //   orderId,
