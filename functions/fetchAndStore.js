@@ -12,14 +12,13 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
     process.env["UKVD_API_URL_VEHICLE_IMAGE_DATA"],
   ];
   let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
-
   const replaceUndefinedWithEmptyString = (obj) => {
     const keys = Object.keys(obj);
     keys.forEach((key) => {
-      if (obj[key] && typeof obj[key] === 'object') {
+      if (obj[key] && typeof obj[key] === "object") {
         replaceUndefinedWithEmptyString(obj[key]);
       } else if (obj[key] === undefined) {
-        obj[key] = '';
+        obj[key] = "";
       }
     });
   };
@@ -70,7 +69,6 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
     console.log("All data fetched successfully.");
     return dataObject;
   };
-
   const user = await db.collection("users").where("email", "==", email).get();
 
   if (user.empty) {
@@ -81,7 +79,6 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
   const uid = userDoc.get("uid");
 
   const orderId = uuidv4();
-
   const orderDoc = db.collection("orders").doc(orderId);
 
   const currentDateTime = new Date().toISOString();
@@ -123,15 +120,6 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
     orderId,
     uid
   );
-
-  const gptBody = {
-    dateTime: currentDateTime,
-    data: dataMain,
-    orderId: orderId,
-    paymentId: paymentId,
-    vehicleFreeData: vehicleFreeData,
-    userId: uid,
-  };
 
   await orderDoc
     .set({
