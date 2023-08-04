@@ -4,6 +4,7 @@ import { db, storage } from "../firebase.js";
 import fs from "fs";
 import stream from "stream";
 import markdownpdf from "markdown-pdf";
+import { dataExtract } from "./dataExtract.js";
 
 const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
   let packageUrls = [
@@ -121,12 +122,15 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
     uid
   );
 
+  let extractedData = dataExtract(dataMain, vehicleFreeData);
+
   await orderDoc
     .set({
       orderId: orderId,
       userId: uid,
       paymentId: paymentId,
       data: dataMain,
+      extractedData: extractedData,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
     })
