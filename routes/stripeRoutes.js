@@ -7,15 +7,17 @@ const router = express.Router();
 // STRIPE API - Create Payment Intent
 router.post("/create-payment-intent", async (req, res) => {
   console.log("ﷺ ﷽");
-  const { email, price, vehicleFreeData } = req.body;
+  const { price, vehicleFreeData } = req.body;
 
+  const customer = await stripe.customers.create({});
   const paymentIntent = await stripe.paymentIntents.create({
     amount: price,
     currency: "gbp",
     automatic_payment_methods: {
       enabled: true,
     },
-    receipt_email: email,
+    customer: customer.id,
+    // receipt_email: email,
     metadata: {
       registrationNumber: vehicleFreeData.registrationNumber,
       taxStatus: vehicleFreeData.taxStatus,
@@ -38,11 +40,12 @@ router.post("/create-payment-intent", async (req, res) => {
 
   res.send({
     clientSecret: paymentIntent.client_secret,
+    customerId: customer.id,
   });
 });
 
 // STRIPE API - Webhook
-router.post("/webhook", (req, res) => {
+router.post("/webhook", async (req, res) => {
   console.log("ﷺ ﷽");
   const sig = req.headers["stripe-signature"];
   let event;
@@ -55,7 +58,10 @@ router.post("/webhook", (req, res) => {
 
   switch (event.type) {
     case "payment_intent.succeeded": {
-      const email = event["data"]["object"]["receipt_email"];
+      const customer = await stripe.customers.retrieve(
+        event["data"]["object"]["customer"]
+      );
+
       const vehicleFreeData = {
         RegistrationNumber:
           event["data"]["object"]["metadata"]["registrationNumber"],
@@ -81,7 +87,11 @@ router.post("/webhook", (req, res) => {
 
       const paymentId = event["data"]["object"]["id"];
 
-      fetchAndStoreVehicleData(email, vehicleFreeData, paymentId)
+      fetchAndStoreVehicleData(
+        customer["metadata"]["userId"],
+        vehicleFreeData,
+        paymentId
+      )
         .then(() => {
           res.json({ received: true });
         })
@@ -93,6 +103,20 @@ router.post("/webhook", (req, res) => {
     }
     default:
       return res.status(400).end();
+  }
+});
+
+router.post("/update-customer", async (req, res) => {
+  const { customerId, email, userId } = req.body;
+
+  try {
+    await stripe.customers.update(customerId, {
+      email: email,
+      metadata: { userId: userId },
+    });
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).send({ error: error.message });
   }
 });
 

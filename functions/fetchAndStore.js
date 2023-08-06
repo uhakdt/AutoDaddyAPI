@@ -6,7 +6,7 @@ import stream from "stream";
 import markdownpdf from "markdown-pdf";
 import { dataExtract } from "./dataExtract.js";
 
-const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
+const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
   let packageUrls = [
     process.env["UKVD_API_URL_VEHICLE_AND_MOT_HISTORY"],
     process.env["UKVD_API_URL_VDI_CHECK_FULL"],
@@ -70,14 +70,6 @@ const fetchAndStoreVehicleData = async (email, vehicleFreeData, paymentId) => {
     console.log("All data fetched successfully.");
     return dataObject;
   };
-  const user = await db.collection("users").where("email", "==", email).get();
-
-  if (user.empty) {
-    throw new Error(`No user found with email: ${email}`);
-  }
-
-  const userDoc = user.docs[0];
-  const uid = userDoc.get("uid");
 
   const orderId = uuidv4();
   const orderDoc = db.collection("orders").doc(orderId);
