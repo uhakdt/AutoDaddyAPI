@@ -6,7 +6,7 @@ const router = express.Router();
 // EMAIL API - Send Report
 router.post("/send-report", async (req, res) => {
   try {
-    const { orderId, vehicleRegMark, userId, email } = req.body;
+    const { orderId, vehicleRegMark, uid, email } = req.body;
 
     const orderSnapshot = await db.collection("orders").doc(orderId).get();
     if (!orderSnapshot.exists) {
@@ -14,11 +14,11 @@ router.post("/send-report", async (req, res) => {
     }
 
     const order = orderSnapshot.data();
-    if (order.userId !== userId) {
+    if (order.uid !== uid) {
       return res.status(403).send("This order does not belong to you");
     }
 
-    const filePath = `user_files/${userId}/reports/${vehicleRegMark}_${orderId}.pdf`;
+    const filePath = `user_files/${uid}/reports/${vehicleRegMark}_${orderId}.pdf`;
     const bucket = storage.bucket();
     const [url] = await bucket.file(filePath).getSignedUrl({
       action: "read",

@@ -90,11 +90,11 @@ const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
     }
   };
 
-  const fetchAndStoreAllImages = async (imageList, orderId, userId) => {
+  const fetchAndStoreAllImages = async (imageList, orderId, uid) => {
     for (let i = 0; i < imageList.length; i++) {
       const imageUrl = imageList[i].ImageUrl;
       const fileName = `${orderId}_image_${i}.jpg`;
-      const filePath = `user_files/${userId}/car_images/${fileName}`;
+      const filePath = `user_files/${uid}/car_images/${fileName}`;
       try {
         await downloadImage(imageUrl, filePath);
       } catch (error) {
@@ -119,7 +119,7 @@ const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
   await orderDoc
     .set({
       orderId: orderId,
-      userId: uid,
+      uid: uid,
       paymentId: paymentId,
       data: dataMain,
       extractedData: extractedData,
@@ -226,11 +226,11 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
   //   }
   // };
 
-  const fetchAndStoreAllImages = async (imageList, orderId, userId) => {
+  const fetchAndStoreAllImages = async (imageList, orderId, uid) => {
     for (let i = 0; i < imageList.length; i++) {
       const imageUrl = imageList[i].ImageUrl;
       const fileName = `${orderId}_image_${i}.jpg`;
-      const filePath = `user_files/${userId}/car_images/${fileName}`;
+      const filePath = `user_files/${uid}/car_images/${fileName}`;
       try {
         await downloadImage(imageUrl, filePath);
       } catch (error) {
@@ -256,7 +256,7 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
   //   orderId: orderId,
   //   paymentId: paymentId,
   //   vehicleFreeData: vehicleFreeData,
-  //   userId: uid,
+  //   uid: uid,
   // };
 
   // const gptResponse = await axios
@@ -273,7 +273,7 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
   await orderDoc
     .set({
       orderId: orderId,
-      userId: uid,
+      uid: uid,
       paymentId: paymentId,
       data: dataMain,
       dateTime: currentDateTime,
@@ -293,7 +293,7 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
   }
 };
 
-const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
+const createPdfAndUploadToStorage = async (uid, vehicleRegMark, orderId) => {
   try {
     let filename = `${vehicleRegMark}_${orderId}.pdf`;
 
@@ -313,7 +313,7 @@ const createPdfAndUploadToStorage = async (userId, vehicleRegMark, orderId) => {
 
     // Create writable stream to Firebase storage
     const bucket = storage.bucket();
-    const filePath = `user_files/${userId}/reports/${filename}`;
+    const filePath = `user_files/${uid}/reports/${filename}`;
     const file = bucket.file(filePath);
     const writeStream = file.createWriteStream({
       metadata: {

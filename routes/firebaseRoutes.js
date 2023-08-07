@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/download-report", async (req, res) => {
   console.log("ﷺ ﷽");
   try {
-    const { orderId, vehicleRegMark, userId } = req.body;
+    const { orderId, vehicleRegMark, uid } = req.body;
 
     const orderSnapshot = await db.collection("orders").doc(orderId).get();
 
@@ -18,12 +18,12 @@ router.post("/download-report", async (req, res) => {
     const order = orderSnapshot.data();
 
     // Check if this order belongs to the authenticated user
-    if (order.userId !== userId) {
+    if (order.uid !== uid) {
       return res.status(403).send("This order does not belong to you");
     }
 
     // Create file path
-    const filePath = `user_files/${userId}/reports/${vehicleRegMark}_${orderId}.pdf`;
+    const filePath = `user_files/${uid}/reports/${vehicleRegMark}_${orderId}.pdf`;
 
     // Create signed URL
     const bucket = storage.bucket();

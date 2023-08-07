@@ -88,7 +88,7 @@ router.post("/webhook", async (req, res) => {
       const paymentId = event["data"]["object"]["id"];
 
       fetchAndStoreVehicleData(
-        customer["metadata"]["userId"],
+        customer["metadata"]["uid"],
         vehicleFreeData,
         paymentId
       )
@@ -107,12 +107,12 @@ router.post("/webhook", async (req, res) => {
 });
 
 router.post("/update-customer", async (req, res) => {
-  const { customerId, email, userId } = req.body;
+  const { customerId, email, usuiderId } = req.body;
 
   try {
     await stripe.customers.update(customerId, {
       email: email,
-      metadata: { userId: userId },
+      metadata: { uid: uid },
     });
     res.status(204).end();
   } catch (error) {
