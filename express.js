@@ -32,6 +32,6 @@ app.use(limiter);
 
 app.use(hpp());
 
-app.use(cors({ origin: process.env["CLIENT_DOMAIN"] }));
+app.use(cors({ origin: "*" }));
 
 export default app;

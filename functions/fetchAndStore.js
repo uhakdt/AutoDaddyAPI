@@ -7,117 +7,119 @@ import markdownpdf from "markdown-pdf";
 import { dataExtract } from "./dataExtract.js";
 
 const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
-  let packageUrls = [
-    process.env["UKVD_API_URL_VEHICLE_AND_MOT_HISTORY"],
-    process.env["UKVD_API_URL_VDI_CHECK_FULL"],
-    process.env["UKVD_API_URL_VEHICLE_IMAGE_DATA"],
-  ];
-  let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
-  const replaceUndefinedWithEmptyString = (obj) => {
-    const keys = Object.keys(obj);
-    keys.forEach((key) => {
-      if (obj[key] && typeof obj[key] === "object") {
-        replaceUndefinedWithEmptyString(obj[key]);
-      } else if (obj[key] === undefined) {
-        obj[key] = "";
-      }
-    });
-  };
-
-  replaceUndefinedWithEmptyString(vehicleFreeData); // handle undefined values for vehicleFreeData
-
-  const fetchData = async (packageUrl, vehicleRegMark) => {
-    try {
-      const response = await axios.get(packageUrl + vehicleRegMark);
-
-      if (response.status !== 200) {
-        throw new Error(`API response was not ok. Status: ${response.status}`);
-      }
-
-      if (response.data.Response.StatusCode === "KeyInvalid") {
-        throw new Error(
-          "Invalid VRM. Please provide a valid vehicle registration mark"
-        );
-      }
-
-      if (response.data.Response.StatusCode !== "Success") {
-        throw new Error(`API error: ${response.data.Response.StatusMessage}`);
-      }
-
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching data from UK Vehicle Data:", error);
-      throw error;
-    }
-  };
-
-  const fetchAllData = async (packageUrls, vehicleRegMark) => {
-    const data = await Promise.all(
-      packageUrls.map((packageUrl) => fetchData(packageUrl, vehicleRegMark))
-    );
-
-    const dataObject = {};
-    for (let i = 0; i < packageUrls.length; i++) {
-      if (packageUrls[i].includes("VehicleAndMotHistory")) {
-        dataObject["VehicleAndMotHistory"] = data[i].Response.DataItems;
-      } else if (packageUrls[i].includes("VdiCheckFull")) {
-        dataObject["VdiCheckFull"] = data[i].Response.DataItems;
-      } else if (packageUrls[i].includes("VehicleImageData")) {
-        dataObject["VehicleImages"] = data[i].Response.DataItems;
-      }
-    }
-
-    console.log("All data fetched successfully.");
-    return dataObject;
-  };
-
-  const orderId = uuidv4();
-  const orderDoc = db.collection("orders").doc(orderId);
-
-  const currentDateTime = new Date().toISOString();
-  const bucket = storage.bucket();
-
-  const downloadImage = async (url, destination) => {
-    try {
-      const response = await axios({
-        url,
-        responseType: "stream",
+  try {
+    let packageUrls = [
+      process.env["UKVD_API_URL_VEHICLE_AND_MOT_HISTORY"],
+      process.env["UKVD_API_URL_VDI_CHECK_FULL"],
+      process.env["UKVD_API_URL_VEHICLE_IMAGE_DATA"],
+    ];
+    let vehicleRegMark = vehicleFreeData.RegistrationNumber.toString();
+    const replaceUndefinedWithEmptyString = (obj) => {
+      const keys = Object.keys(obj);
+      keys.forEach((key) => {
+        if (obj[key] && typeof obj[key] === "object") {
+          replaceUndefinedWithEmptyString(obj[key]);
+        } else if (obj[key] === undefined) {
+          obj[key] = "";
+        }
       });
-      await response.data.pipe(bucket.file(destination).createWriteStream());
-    } catch (error) {
-      console.error(`Error downloading image from URL "${url}":`, error);
-      throw error;
-    }
-  };
+    };
 
-  const fetchAndStoreAllImages = async (imageList, orderId, uid) => {
-    for (let i = 0; i < imageList.length; i++) {
-      const imageUrl = imageList[i].ImageUrl;
-      const fileName = `${orderId}_image_${i}.jpg`;
-      const filePath = `user_files/${uid}/car_images/${fileName}`;
+    replaceUndefinedWithEmptyString(vehicleFreeData); // handle undefined values for vehicleFreeData
+
+    const fetchData = async (packageUrl, vehicleRegMark) => {
       try {
-        await downloadImage(imageUrl, filePath);
+        const response = await axios.get(packageUrl + vehicleRegMark);
+
+        if (response.status !== 200) {
+          throw new Error(
+            `API response was not ok. Status: ${response.status}`
+          );
+        }
+
+        if (response.data.Response.StatusCode === "KeyInvalid") {
+          throw new Error(
+            "Invalid VRM. Please provide a valid vehicle registration mark"
+          );
+        }
+
+        if (response.data.Response.StatusCode !== "Success") {
+          throw new Error(`API error: ${response.data.Response.StatusMessage}`);
+        }
+
+        return response.data;
       } catch (error) {
-        console.error(`Error downloading and storing image ${i + 1}:`, error);
+        console.error("Error fetching data from UK Vehicle Data:", error);
         throw error;
       }
-    }
-  };
+    };
 
-  const dataMain = await fetchAllData(packageUrls, vehicleRegMark);
+    const fetchAllData = async (packageUrls, vehicleRegMark) => {
+      const data = await Promise.all(
+        packageUrls.map((packageUrl) => fetchData(packageUrl, vehicleRegMark))
+      );
 
-  replaceUndefinedWithEmptyString(dataMain); // handle undefined values for dataMain
+      const dataObject = {};
+      for (let i = 0; i < packageUrls.length; i++) {
+        if (packageUrls[i].includes("VehicleAndMotHistory")) {
+          dataObject["VehicleAndMotHistory"] = data[i].Response.DataItems;
+        } else if (packageUrls[i].includes("VdiCheckFull")) {
+          dataObject["VdiCheckFull"] = data[i].Response.DataItems;
+        } else if (packageUrls[i].includes("VehicleImageData")) {
+          dataObject["VehicleImages"] = data[i].Response.DataItems;
+        }
+      }
 
-  await fetchAndStoreAllImages(
-    dataMain.VehicleImages.VehicleImages.ImageDetailsList,
-    orderId,
-    uid
-  );
+      console.log("All data fetched successfully.");
+      return dataObject;
+    };
 
-  let extractedData = dataExtract(dataMain, vehicleFreeData);
+    const orderId = uuidv4();
+    const orderDoc = db.collection("orders").doc(orderId);
 
-  await orderDoc
-    .set({
+    const currentDateTime = new Date().toISOString();
+    const bucket = storage.bucket();
+
+    const downloadImage = async (url, destination) => {
+      try {
+        const response = await axios({
+          url,
+          responseType: "stream",
+        });
+        await response.data.pipe(bucket.file(destination).createWriteStream());
+      } catch (error) {
+        console.error(`Error downloading image from URL "${url}":`, error);
+        throw error;
+      }
+    };
+
+    const fetchAndStoreAllImages = async (imageList, orderId, uid) => {
+      for (let i = 0; i < imageList.length; i++) {
+        const imageUrl = imageList[i].ImageUrl;
+        const fileName = `${orderId}_image_${i}.jpg`;
+        const filePath = `user_files/${uid}/car_images/${fileName}`;
+        try {
+          await downloadImage(imageUrl, filePath);
+        } catch (error) {
+          console.error(`Error downloading and storing image ${i + 1}:`, error);
+          throw error;
+        }
+      }
+    };
+
+    const dataMain = await fetchAllData(packageUrls, vehicleRegMark);
+
+    replaceUndefinedWithEmptyString(dataMain); // handle undefined values for dataMain
+
+    await fetchAndStoreAllImages(
+      dataMain.VehicleImages.VehicleImages.ImageDetailsList,
+      orderId,
+      uid
+    );
+
+    let extractedData = dataExtract(dataMain, vehicleFreeData);
+
+    await orderDoc.set({
       orderId: orderId,
       uid: uid,
       paymentId: paymentId,
@@ -125,16 +127,20 @@ const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
       extractedData: extractedData,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
-    })
-    .catch((error) => {
-      console.error("Error writing order to database:", error);
-      throw error;
     });
 
-  try {
-    await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
+    try {
+      await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
+    } catch (error) {
+      console.error(
+        "Error occurred while creating or uploading the PDF:",
+        error
+      );
+      throw error;
+    }
+    return { success: true, orderId: orderId };
   } catch (error) {
-    console.error("Error occurred while creating or uploading the PDF:", error);
+    console.error("Error:", error);
     throw error;
   }
 };

@@ -78,20 +78,19 @@ router.post("/webhook", async (req, res) => {
 
       const paymentId = event["data"]["object"]["id"];
 
-      console.log(event["data"]["object"]);
-
-      fetchAndStoreVehicleData(
-        event["data"]["object"]["metadata"]["uid"],
-        vehicleFreeData,
-        paymentId
-      )
-        .then(() => {
+      try {
+        const result = await fetchAndStoreVehicleData(
+          event["data"]["object"]["metadata"]["uid"],
+          vehicleFreeData,
+          paymentId
+        );
+        if (result.success) {
           res.json({ received: true });
-        })
-        .catch((err) => {
-          console.error(`Error handling success: ${err}`);
-          res.status(500).send(err.message);
-        });
+        }
+      } catch (err) {
+        console.error(`Error handling success: ${err}`);
+        res.status(500).send(err.message);
+      }
       break;
     }
     default:
@@ -100,12 +99,9 @@ router.post("/webhook", async (req, res) => {
 });
 
 router.post("/update-payment-intent", async (req, res) => {
-  console.log("update-payment-intent");
   const { paymentIntentId, uid } = req.body;
 
   try {
-    await stripe.paymentIntents.retrieve(paymentIntentId);
-
     await stripe.paymentIntents.update(paymentIntentId, {
       metadata: { uid: uid },
     });
