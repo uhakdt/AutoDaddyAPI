@@ -6,18 +6,14 @@ const router = express.Router();
 
 // STRIPE API - Create Payment Intent
 router.post("/create-payment-intent", async (req, res) => {
-  console.log("ﷺ ﷽");
   const { price, vehicleFreeData } = req.body;
 
-  const customer = await stripe.customers.create({});
   const paymentIntent = await stripe.paymentIntents.create({
     amount: price,
     currency: "gbp",
     automatic_payment_methods: {
       enabled: true,
     },
-    customer: customer.id,
-    // receipt_email: email,
     metadata: {
       registrationNumber: vehicleFreeData.registrationNumber,
       taxStatus: vehicleFreeData.taxStatus,
@@ -40,13 +36,12 @@ router.post("/create-payment-intent", async (req, res) => {
 
   res.send({
     clientSecret: paymentIntent.client_secret,
-    customerId: customer.id,
+    paymentIntentId: paymentIntent.id,
   });
 });
 
 // STRIPE API - Webhook
 router.post("/webhook", async (req, res) => {
-  console.log("ﷺ ﷽");
   const sig = req.headers["stripe-signature"];
   let event;
 
@@ -58,10 +53,6 @@ router.post("/webhook", async (req, res) => {
 
   switch (event.type) {
     case "payment_intent.succeeded": {
-      const customer = await stripe.customers.retrieve(
-        event["data"]["object"]["customer"]
-      );
-
       const vehicleFreeData = {
         RegistrationNumber:
           event["data"]["object"]["metadata"]["registrationNumber"],
@@ -87,8 +78,10 @@ router.post("/webhook", async (req, res) => {
 
       const paymentId = event["data"]["object"]["id"];
 
+      console.log(event["data"]["object"]);
+
       fetchAndStoreVehicleData(
-        customer["metadata"]["uid"],
+        event["data"]["object"]["metadata"]["uid"],
         vehicleFreeData,
         paymentId
       )
@@ -106,14 +99,17 @@ router.post("/webhook", async (req, res) => {
   }
 });
 
-router.post("/update-customer", async (req, res) => {
-  const { customerId, email, usuiderId } = req.body;
+router.post("/update-payment-intent", async (req, res) => {
+  console.log("update-payment-intent");
+  const { paymentIntentId, uid } = req.body;
 
   try {
-    await stripe.customers.update(customerId, {
-      email: email,
+    await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    await stripe.paymentIntents.update(paymentIntentId, {
       metadata: { uid: uid },
     });
+
     res.status(204).end();
   } catch (error) {
     res.status(500).send({ error: error.message });
