@@ -4,7 +4,7 @@ import { db, storage } from "../firebase.js";
 import fs from "fs";
 import stream from "stream";
 import markdownpdf from "markdown-pdf";
-import { dataExtract } from "./dataExtract.js";
+import dataExtract from "./dataExtract.js";
 
 const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
   try {
