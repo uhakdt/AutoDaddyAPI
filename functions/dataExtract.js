@@ -27,7 +27,11 @@ function dataExtract(dataMain, vehicleFreeData) {
 
   return combinedResults;
 }
-function extractVehicleInfo(vehicleRegistration, technicalDetails, vehicleHistory) {
+function extractVehicleInfo(
+  vehicleRegistration,
+  technicalDetails,
+  vehicleHistory
+) {
   let vehicleInfoResult = "\nTopic: Main Details:\n";
 
   let mainDetails = {
@@ -146,7 +150,8 @@ function extractVehicleTAX(vehicleRegistration, vehicleFreeData) {
   let taxDueDate = new Date(taxDueDateStr);
   let currentDate = new Date();
   let timeDiff = taxDueDate - currentDate;
-  let daysLeft = timeDiff > 0 ? Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) : "N/A";
+  let daysLeft =
+    timeDiff > 0 ? Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) : "N/A";
 
   // Create a dictionary to hold the required tax details
   let taxInfo = {
@@ -270,21 +275,23 @@ function extractOutstandingFinances(financeRecords) {
   financesResults += `Number of Outstanding Finance Records: ${numRecords}\n`;
 
   for (let record of financeRecords) {
-    if (record.AgreementDate && record.AgreementTerm && record.AgreementType) {
-      let agreementTypeRating = agreementTypeScale[record.AgreementType] || "N/A";
-
-      financesResults += `Agreement Date: ${record.AgreementDate}\n`;
-      financesResults += `Agreement Term: ${record.AgreementTerm} months`;
-      financesResults += `Agreement Type: ${record.AgreementType}\n`;
-      financesResults += `Finance Company: ${record.FinanceCompany || "N/A"}\n`;
-      financesResults += `Vehicle Description: ${record.VehicleDescription || "N/A"}\n`;
-    }
+    financesResults += `Agreement Date: ${record.AgreementDate}\n`;
+    financesResults += `Agreement Term: ${record.AgreementTerm} months`;
+    financesResults += `Agreement Type: ${record.AgreementType}\n`;
+    financesResults += `Finance Company: ${record.FinanceCompany || "N/A"}\n`;
+    financesResults += `Vehicle Description: ${
+      record.VehicleDescription || "N/A"
+    }\n`;
   }
 
   return financesResults;
 }
 
-function extractImportantChecks(importantChecksRecords, v5cCertificateList, v5cCount) {
+function extractImportantChecks(
+  importantChecksRecords,
+  v5cCertificateList,
+  v5cCount
+) {
   let importantChecksResults = "\nTopic: Important Checks\n";
 
   try {
@@ -311,7 +318,7 @@ function extractImportantChecks(importantChecksRecords, v5cCertificateList, v5cC
 
 function extractStolenInfo(vdiCheckFull) {
   let stolenInfoResults = "\nTopic: Stolen\n";
-  
+
   try {
     if (!vdiCheckFull.StolenStatus) {
       throw new Error("The vehicle is not reported as stolen");
@@ -337,17 +344,28 @@ function extractImportExportInfo(vehicleRegistration) {
   let result = [
     ["DateFirstRegistered", vehicleRegistration.DateFirstRegistered],
     ["Imported", vehicleRegistration.Imported ? "Yes" : "No"],
-    ["ImportDate", vehicleRegistration.Imported ? vehicleRegistration.DateFirstRegistered : null],
-    ["ImportUsedBeforeUKRegistration", vehicleRegistration.VehicleUsedBeforeFirstRegistration ? "Yes" : "No"],
+    [
+      "ImportDate",
+      vehicleRegistration.Imported
+        ? vehicleRegistration.DateFirstRegistered
+        : null,
+    ],
+    [
+      "ImportUsedBeforeUKRegistration",
+      vehicleRegistration.VehicleUsedBeforeFirstRegistration ? "Yes" : "No",
+    ],
     ["ImportedFromOutsideEU", vehicleRegistration.ImportNonEu ? "Yes" : "No"],
     ["Exported", vehicleRegistration.Exported ? "Yes" : "No"],
-    ["ExportDate", vehicleRegistration.Exported ? vehicleRegistration.DateExported : null],
+    [
+      "ExportDate",
+      vehicleRegistration.Exported ? vehicleRegistration.DateExported : null,
+    ],
   ];
 
   for (let item of result) {
     exportResults += `${item[0]}: ${item[1]}\n`;
   }
-  
+
   return exportResults;
 }
 
@@ -355,8 +373,10 @@ function extractWriteOffInfo(vdiCheckFull) {
   let writeOffResults = "\nTopic: Write Off \n";
 
   let recordCount = vdiCheckFull.WriteOffRecordCount || 0;
-  // Define category 
-  let category = ""; 
+  // Define category
+  let category = "";
+  let categoryScore = 0;
+  let recordCountScore = 0;
 
   let result = [
     ["Record Count", recordCount, recordCountScore],
@@ -377,7 +397,9 @@ function extractWriteOffInfo(vdiCheckFull) {
       let lossType = record.LossType || "N/A";
       let category = record.Category || "N/A";
 
-      writeOffResults += `Write Off Record ${idx + 1}: MiaftrEntryDate: ${miaftrEntryDate}, LossDate: ${lossDate}, LossType: ${lossType}, Category: ${category}\n`;
+      writeOffResults += `Write Off Record ${
+        idx + 1
+      }: MiaftrEntryDate: ${miaftrEntryDate}, LossDate: ${lossDate}, LossType: ${lossType}, Category: ${category}\n`;
     }
   }
 
@@ -387,7 +409,10 @@ function extractWriteOffInfo(vdiCheckFull) {
 function extractVICInfo(vehicleHistory) {
   let vicResults = "\nTopic: VIC \n";
 
-  let vicList = Array.isArray(vehicleHistory.VicList) && vehicleHistory.VicList.length > 0 ? vehicleHistory.VicList : null;
+  let vicList =
+    Array.isArray(vehicleHistory.VicList) && vehicleHistory.VicList.length > 0
+      ? vehicleHistory.VicList
+      : null;
 
   if (!vicList) {
     vicResults += "No VIC test detected.";
@@ -398,7 +423,7 @@ function extractVICInfo(vehicleHistory) {
       vicResults += `VIC Entry ${i + 1}:\n`;
       for (let key in vic) {
         if (vic.hasOwnProperty(key)) {
-          vicResults += `${key}: ${vic[key]}\n`; 
+          vicResults += `${key}: ${vic[key]}\n`;
         }
       }
     }

@@ -1,6 +1,7 @@
 import express from "express";
 import { stripe, endpointSecret } from "../stripe.js";
 import { fetchAndStoreVehicleData } from "../functions/fetchAndStore.js";
+import sendEmail from "../email.js";
 
 const router = express.Router();
 
@@ -81,6 +82,7 @@ router.post("/webhook", async (req, res) => {
       try {
         const result = await fetchAndStoreVehicleData(
           event["data"]["object"]["metadata"]["uid"],
+          event["data"]["object"]["receipt_email"],
           vehicleFreeData,
           paymentId
         );

@@ -5,8 +5,14 @@ import fs from "fs";
 import stream from "stream";
 import markdownpdf from "markdown-pdf";
 import dataExtract from "./dataExtract.js";
+import sendEmail from "../email.js";
 
-const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
+const fetchAndStoreVehicleData = async (
+  uid,
+  email,
+  vehicleFreeData,
+  paymentId
+) => {
   try {
     let packageUrls = [
       process.env["UKVD_API_URL_VEHICLE_AND_MOT_HISTORY"],
@@ -138,6 +144,10 @@ const fetchAndStoreVehicleData = async (uid, vehicleFreeData, paymentId) => {
       );
       throw error;
     }
+
+    const url = `${process.env["CLIENT_DOMAIN"]}/dashboard?orderId=${orderId}`;
+    await sendEmail(email, url);
+
     return { success: true, orderId: orderId };
   } catch (error) {
     console.error("Error:", error);

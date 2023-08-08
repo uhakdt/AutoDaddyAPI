@@ -1,7 +1,11 @@
 import { google } from "googleapis";
 import nodemailer from "nodemailer";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const oAuth2Client = new google.auth.OAuth2(
   process.env["GCP_GMAIL_CLIENT_ID"],
@@ -13,7 +17,7 @@ oAuth2Client.setCredentials({
   refresh_token: process.env["GCP_GMAIL_REFRESH_TOKEN"],
 });
 
-const sendEmail = async (email, orderId, url) => {
+const sendEmail = async (email, url) => {
   try {
     const accessToken = await oAuth2Client.getAccessToken();
 
@@ -41,7 +45,7 @@ const sendEmail = async (email, orderId, url) => {
     const mailOptions = {
       from: "X Y <uhakdt@gmail.com>",
       to: email,
-      subject: "AutoDaddy - Your order is ready",
+      subject: "AutoDaddy - Your Report is ready",
       html: emailTemplate,
     };
 
