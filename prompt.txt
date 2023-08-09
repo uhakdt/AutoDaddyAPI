@@ -1,0 +1,120 @@
+I want you to write several summaries. Firstly:
+-----
+Core Guidelines:
+Immediate Insights: Dive directly into the essence of the data without superfluous introductions.
+Data Synthesis: Meld different data points to form cohesive insights, rather than isolated comments.
+Benchmarking: Always place findings within the context of industry or class averages.
+Precision: Be concise, but ensure each insight is packed with relevance.
+Rating Logic: The rating should represent a synthesis of the data provided, set against averages in the car's category.
+Structure: Maintain clear topic divisions and adhere to the order and nomenclature provided.
+
+Summary:
+Draw from the car's data to generate a 100-word evaluative summary addressing:
+
+Performance: Contextualize against cars of similar class. Any standout features?
+Fuel Efficiency: How does it fare against its peers?
+Maintenance and Reliability: What story does the MOT test data tell?
+Keeper History: Keeper transitions, mileage coherence, and date synchronicity – what stands out?
+Financial Obligations: Illuminate potential financial pitfalls.
+Stolen or Write-Off Status: Clarify any concerns here.
+Closure: "A more detailed analysis of each data is shown below."
+
+For the first paragraph, rate the car from Awful-Outstanding and give your summarised verdict by looking at this information:
+Awful: This is as bad as it could possibly be. It's unsatisfactory and very disappointing.
+Very poor: This is clearly below average. There's a lot of room for improvement.
+Poor: It's less than satisfactory. Things aren't going well.
+Fair: It's not the worst, but it's far from good. It's mediocre at best.
+Average: This is a mid-point. Not particularly good, but not particularly bad either.
+Satisfactory: It's slightly above average. It meets the minimum expectations but doesn't exceed them.
+Good: This is comfortably above average. It's pretty good, but not outstanding.
+Very good: This is a high mark. It's notably better than average.
+Excellent: This is near perfect. There's very little to criticize here.
+Outstanding: This is the best it could possibly be. It's exceptional and far exceeds expectations.
+
+Deep Dive Analysis:
+For every topic, craft a 50-word examination. Each should:
+
+Commence with a rating, representing the synthesis of information.
+Emphasize intersections of various data points, not just standalone facts.
+Avoid regurgitating data; instead, focus on its implications.
+Culminate with pinpointing anomalies or peculiarities.
+Topics:
+
+Main Details: Model's positioning, fuel type implications, engine efficiency versus competition, gearbox evaluation, and age coherency.
+Energy & Consumption: Comprehensive energy profile – how power, torque, consumption patterns, and emissions intertwine.
+MOT Metrics: What do MOT patterns and specific failures reveal?
+Tax and Legal: Tax status and upcoming obligations.
+Mileage: Evaluate mileage legitimacy and identify anomalies.
+Plate Changes: Investigate reasons behind plate transitions.
+Outstanding finances: Illuminate the car's financial history and current status.
+Important Checks: From VIN to V5c, assess the car's legitimacy.
+Stolen: Cross-verify theft concerns.
+Import/Export: Legal implications of import/export patterns.
+Write-Off: Category implications juxtaposed with MOT outcomes.
+VIC: The car's history in light of VIC’s relevance.
+
+
+THE FOLLOWING IS THE MOST IMPORTANT!
+I WANT YOU TO ONLY REPLY WITH THE FOLLOWING TYPE OF RESPONSE - IT SHOULD BE A JSON format like this:
+
+
+\{
+    'summary': \{
+        "rating": "",
+        "estimated_valuation": "THIS SHOULD BE A NUMBER IN BRITISH POUNDS",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "main_details_analysis": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "energy_&_consumption_analysis": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "mot_metrics_analysis": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "tax_details_analysis": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "mileage_analysis": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "plate_changes": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "outstanding_finances": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "important_checks": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "stolen": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "import_/_export": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "write_off": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \},
+    "vic_inspected": \{
+        "rating": "",
+        "content": "SHOULD NOT INCLUDE Topic: at the beginning."
+    \}
+\}
+
+I ONLY WANT YOU TO RESPOND WITH NOTHING ELSE BUT THAT POPULATED JSON FILE WITH THE CORRESPONDING VALUES!! ANYTHING ELSE AND EVERYHING IS RUINED!!!!
+**DONT FORGET I WANT IT IN THAT EXACT JSON FORMAT**
+
+Data:

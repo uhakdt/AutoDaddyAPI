@@ -27,6 +27,7 @@ function dataExtract(dataMain, vehicleFreeData) {
 
   return combinedResults;
 }
+
 function extractVehicleInfo(
   vehicleRegistration,
   technicalDetails,
@@ -94,49 +95,50 @@ function extractMOTHistory(motHistory) {
   let recencyOfFailure = "N/A";
   let testDetails = [];
 
-  for (let record of motHistory) {
-    // Count pass and fail results
-    let testResult = record["TestResult"] || "N/A";
-    if (testResult === "Pass") {
-      passCount++;
-    } else if (testResult === "Fail") {
-      failCount++;
-      recencyOfFailure = record["DaysSinceLastTest"] || "N/A";
+  if (motHistory !== undefined && motHistory !== null) {
+    for (let record of motHistory) {
+      // Count pass and fail results
+      let testResult = record["TestResult"] || "N/A";
+      if (testResult === "Pass") {
+        passCount++;
+      } else if (testResult === "Fail") {
+        failCount++;
+        recencyOfFailure = record["DaysSinceLastTest"] || "N/A";
+      }
+
+      // Count advice items, failures, dangerous failures, and retests
+      adviceItems += record["AdvisoryNoticeCount"] || 0;
+      totalItemsFailed += (record["FailureReasonList"] || []).length;
+      dangerousFailures += record["DangerousFailureCount"] || 0;
+      if (record["IsRetest"]) {
+        retests++;
+      }
+
+      // Append test details for later reporting
+      testDetails.push({
+        ExpiryDate: record["ExpiryDate"] || "N/A",
+        TestDate: record["TestDate"] || "N/A",
+        TestNumber: record["TestNumber"] || "N/A",
+        TestResult: record["TestResult"] || "N/A",
+      });
     }
+    // Calculate pass rate, or set to 0 if no tests
+    totalTests = motHistory.length;
+    let passRate = totalTests != 0 ? (passCount / totalTests) * 100 : 0;
 
-    // Count advice items, failures, dangerous failures, and retests
-    adviceItems += record["AdvisoryNoticeCount"] || 0;
-    totalItemsFailed += (record["FailureReasonList"] || []).length;
-    dangerousFailures += record["DangerousFailureCount"] || 0;
-    if (record["IsRetest"]) {
-      retests++;
+    // Append the results to motHistoryResult string
+    motHistoryResult += "MOT Metrics:\n";
+    motHistoryResult += `Pass Rate: ${passRate}%\n`;
+    motHistoryResult += `Failed Tests: ${failCount}\n`;
+    motHistoryResult += `Total Advice Items: ${adviceItems}\n`;
+    motHistoryResult += `Total Items Failed: ${totalItemsFailed}\n`;
+    motHistoryResult += `Dangerous Failures: ${dangerousFailures}\n`;
+    motHistoryResult += `Retests: ${retests}\n`;
+    motHistoryResult += `Recency of Failure: ${recencyOfFailure}\n`;
+
+    for (let test of testDetails) {
+      motHistoryResult += JSON.stringify(test) + "\n";
     }
-
-    // Append test details for later reporting
-    testDetails.push({
-      ExpiryDate: record["ExpiryDate"] || "N/A",
-      TestDate: record["TestDate"] || "N/A",
-      TestNumber: record["TestNumber"] || "N/A",
-      TestResult: record["TestResult"] || "N/A",
-    });
-  }
-
-  // Calculate pass rate, or set to 0 if no tests
-  totalTests = motHistory.length;
-  let passRate = totalTests != 0 ? (passCount / totalTests) * 100 : 0;
-
-  // Append the results to motHistoryResult string
-  motHistoryResult += "MOT Metrics:\n";
-  motHistoryResult += `Pass Rate: ${passRate}%\n`;
-  motHistoryResult += `Failed Tests: ${failCount}\n`;
-  motHistoryResult += `Total Advice Items: ${adviceItems}\n`;
-  motHistoryResult += `Total Items Failed: ${totalItemsFailed}\n`;
-  motHistoryResult += `Dangerous Failures: ${dangerousFailures}\n`;
-  motHistoryResult += `Retests: ${retests}\n`;
-  motHistoryResult += `Recency of Failure: ${recencyOfFailure}\n`;
-
-  for (let test of testDetails) {
-    motHistoryResult += JSON.stringify(test) + "\n";
   }
 
   return motHistoryResult;
@@ -171,7 +173,11 @@ function extractVehicleMileage(mileageRecords) {
   let mileageResult = "\nTopic: Mileage\n";
 
   // Ensure there are records to extract
-  if (mileageRecords.length === 0) {
+  if (
+    mileageRecords === null ||
+    mileageRecords === undefined ||
+    mileageRecords.length === 0
+  ) {
     return "No mileage records available.";
   }
 
@@ -235,10 +241,15 @@ function extractVehicleMileage(mileageRecords) {
 
   return mileageResult;
 }
+
 function extractPlateChanges(plateRecords) {
   let plateResults = "\nTopic: Plate Changes\n";
 
-  if (plateRecords.length === 0) {
+  if (
+    plateRecords === null ||
+    plateRecords === undefined ||
+    plateRecords.length === 0
+  ) {
     return "No plate change records found.";
   }
 
@@ -266,13 +277,16 @@ function extractPlateChanges(plateRecords) {
 
 function extractOutstandingFinances(financeRecords) {
   let financesResults = "\nTopic: Outstanding Finances\n";
-  let numRecords = financeRecords.length;
 
-  if (numRecords === 0) {
+  if (
+    financeRecords === null ||
+    financeRecords === undefined ||
+    financeRecords.length === 0
+  ) {
     return "No outstanding finance records found.";
   }
 
-  financesResults += `Number of Outstanding Finance Records: ${numRecords}\n`;
+  financesResults += `Number of Outstanding Finance Records: ${financeRecords.length}\n`;
 
   for (let record of financeRecords) {
     financesResults += `Agreement Date: ${record.AgreementDate}\n`;

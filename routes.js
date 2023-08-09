@@ -6,6 +6,7 @@ import oneAutoApiRoutes from "./routes/oneAutoApiRoutes.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import firebaseRoutes from "./routes/firebaseRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
+import gptRoutes from "./routes/gptRoutes.js";
 
 app.get("/api/v1", (req, res) => {
   console.log("ﷺ ﷽");
@@ -18,5 +19,6 @@ app.use("/api/v1/oneautoapi", oneAutoApiRoutes);
 app.use("/api/v1/stripe", stripeRoutes);
 app.use("/api/v1/firebase", firebaseRoutes);
 app.use("/api/v1/email", emailRoutes);
+app.use("/api/v1/gpt", gptRoutes);
 
 export default app;
