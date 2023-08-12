@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 import cors from "cors";
 import compression from "compression";
 import helmet from "helmet";
@@ -12,6 +14,8 @@ import serveWellKnownStaticFile from "./staticFiles.js";
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(parseBody);
 
@@ -34,4 +38,4 @@ app.use(hpp());
 
 app.use(cors({ origin: "*" }));
 
-export default app;
+export { app, server, io }; // Export server and io

@@ -1,4 +1,5 @@
-import app from "./express.js";
+import { app, server, io } from "./express.js";
+import webSocket from "./webSocket.js";
 
 import dvlaRoutes from "./routes/dvlaRoutes.js";
 import ukvdRoutes from "./routes/ukvdRoutes.js";
@@ -21,4 +22,6 @@ app.use("/api/v1/firebase", firebaseRoutes);
 app.use("/api/v1/email", emailRoutes);
 app.use("/api/v1/gpt", gptRoutes);
 
-export default app;
+webSocket(io);
+
+export { app, server };
