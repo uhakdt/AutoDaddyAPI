@@ -16,13 +16,13 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  path: "/api/v1", // Specify the path here
+  path: "/api/v1/chat", // Specify the path here
   cors: { origin: "*" },
 });
 
 app.use(parseBody);
 
-app.use("/.well-known", serveWellKnownStaticFile);
+app.use("../.well-known", serveWellKnownStaticFile);
 
 app.use(logger);
 

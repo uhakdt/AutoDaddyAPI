@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const GetGPTResponse = async (conversation) => {
-  const apiKey = process.env["OPENAI_API_KEY"];
+  const apiKey = process.env["OPENAI_KEY"];
 
   const client = axios.create({
     headers: {

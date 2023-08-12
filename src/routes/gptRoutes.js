@@ -26,7 +26,7 @@ router.post("/summary", async (req, res) => {
 });
 
 async function GetGPTResponse(data, model = "gpt-3.5-turbo-16k") {
-  const apiKey = process.env["OPENAI_API_KEY"];
+  const apiKey = process.env["OPENAI_KEY"];
 
   const client = axios.create({
     headers: {
@@ -34,7 +34,10 @@ async function GetGPTResponse(data, model = "gpt-3.5-turbo-16k") {
     },
   });
 
-  const file = fs.readFileSync(path.join(__dirname, "../prompt.txt"), "utf8");
+  const file = fs.readFileSync(
+    path.join(__dirname, "../templates/prompt.txt"),
+    "utf8"
+  );
 
   const prompt = file + data;
   const messages = [{ role: "user", content: prompt }];

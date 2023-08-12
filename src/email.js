@@ -35,7 +35,7 @@ const sendEmail = async (email, url) => {
 
     // Read the email template
     let emailTemplate = fs.readFileSync(
-      path.join(__dirname, "./emailTemplate.html"),
+      path.join(__dirname, "./templates/emailTemplate.html"),
       "utf8"
     );
 

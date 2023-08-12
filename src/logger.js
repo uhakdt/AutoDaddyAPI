@@ -16,7 +16,7 @@ const generator = (time) => {
 
 const accessLogStream = rfs.createStream(generator, {
   interval: "1d",
-  path: path.join(__dirname, "logs"),
+  path: path.join(__dirname, "../logs"),
   maxSize: "10M",
   maxFiles: 10,
 });

@@ -1,7 +1,6 @@
 import express from "express";
 import { stripe, endpointSecret } from "../stripe.js";
 import { fetchAndStoreVehicleData } from "../functions/fetchAndStore.js";
-import sendEmail from "../email.js";
 
 const router = express.Router();
 
