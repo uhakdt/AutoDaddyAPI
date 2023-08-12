@@ -15,7 +15,10 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, {
+  path: "/api/v1", // Specify the path here
+  cors: { origin: "*" },
+});
 
 app.use(parseBody);
 
