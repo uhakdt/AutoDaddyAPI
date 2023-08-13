@@ -17,7 +17,7 @@ router.use(express.text());
 // OPENAI API - GPT SUMMARY
 router.post("/summary", async (req, res) => {
   try {
-    const data = req.body;
+    const data = req.body.extractedData; // Accessing the 'extractedData' key
     const response_text = await GetGPTResponse(data);
     res.json(JSON.parse(response_text));
   } catch (e) {
@@ -25,7 +25,7 @@ router.post("/summary", async (req, res) => {
   }
 });
 
-async function GetGPTResponse(data, model = "gpt-3.5-turbo-16k") {
+async function GetGPTResponse(data) {
   const apiKey = process.env["OPENAI_KEY"];
 
   const client = axios.create({
@@ -44,7 +44,7 @@ async function GetGPTResponse(data, model = "gpt-3.5-turbo-16k") {
 
   const params = {
     messages: messages,
-    model: model,
+    model: "gpt-3.5-turbo-16k",
     temperature: 0.0,
   };
 

@@ -7,6 +7,12 @@ import markdownpdf from "markdown-pdf";
 import dataExtract from "./dataExtract.js";
 import sendEmail from "../email.js";
 
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const fetchAndStoreVehicleData = async (
   uid,
   email,
@@ -314,7 +320,10 @@ const createPdfAndUploadToStorage = async (uid, vehicleRegMark, orderId) => {
     let filename = `${vehicleRegMark}_${orderId}.pdf`;
 
     // Markdown to PDF
-    let markdown = fs.readFileSync("./reportTemplate.md", "utf8");
+    let markdown = fs.readFileSync(
+      path.join(__dirname, "../templates/reportTemplate.md"),
+      "utf8"
+    );
     let yourVariable = "﷽";
     let markdownText = markdown.replace("An h1 header", yourVariable);
 
