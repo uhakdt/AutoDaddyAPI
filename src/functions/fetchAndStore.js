@@ -139,6 +139,8 @@ const fetchAndStoreVehicleData = async (
       extractedData: extractedData,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
+      gptRequested: false,
+      gptChatRequestNumber: 20,
     });
 
     try {
