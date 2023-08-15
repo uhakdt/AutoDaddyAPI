@@ -28,7 +28,13 @@ app.use(logger);
 
 app.use(compression());
 
-app.use(helmet());
+app.use(
+  helmet.hsts({
+    maxAge: 31536000, // 1 year in seconds
+    includeSubDomains: true,
+    preload: true,
+  })
+);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
