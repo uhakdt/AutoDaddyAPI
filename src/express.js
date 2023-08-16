@@ -16,7 +16,7 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  path: "/api/v1/chat", // Specify the path here
+  path: "/api/v1/chat",
   cors: { origin: "*" },
 });
 
@@ -30,7 +30,7 @@ app.use(compression());
 
 app.use(
   helmet.hsts({
-    maxAge: 31536000, // 1 year in seconds
+    maxAge: 31536000,
     includeSubDomains: true,
     preload: true,
   })
@@ -47,4 +47,4 @@ app.use(hpp());
 
 app.use(cors({ origin: "*" }));
 
-export { app, server, io }; // Export server and io
+export { app, server, io };
