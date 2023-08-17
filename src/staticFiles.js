@@ -6,8 +6,10 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const rootDir = path.resolve(__dirname, "..");
+
 const serveWellKnownStaticFile = express.static(
-  path.join(__dirname, ".well-known")
+  path.join(rootDir, ".well-known")
 );
 
 export default serveWellKnownStaticFile;

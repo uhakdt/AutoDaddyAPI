@@ -22,7 +22,7 @@ const io = new Server(server, {
 
 app.use(parseBody);
 
-app.use("../.well-known", serveWellKnownStaticFile);
+app.use("/.well-known", serveWellKnownStaticFile);
 
 app.use(logger);
 
