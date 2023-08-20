@@ -137,6 +137,11 @@ const fetchAndStoreVehicleData = async (
       paymentId: paymentId,
       data: dataMain,
       extractedData: extractedData,
+      ulez: IsULEZCompliant(
+        dataMain.VehicleAndMotHistory?.VehicleRegistration?.FuelType,
+        dataMain.VehicleAndMotHistory?.TechnicalDetails?.General?.EuroStatus,
+        dataMain.VehicleAndMotHistory?.VehicleRegistration?.VehicleClass
+      ),
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
       gptRequested: false,
@@ -367,6 +372,31 @@ const createPdfAndUploadToStorage = async (uid, vehicleRegMark, orderId) => {
     );
     throw error;
   }
+};
+
+const IsULEZCompliant = (fuelType, euroScore, vehicleClass) => {
+  if (!fuelType || !vehicleClass || euroScore === null || euroScore === "") {
+    return false;
+  }
+
+  fuelType = fuelType.toLowerCase();
+  vehicleClass = vehicleClass.toLowerCase();
+
+  if (vehicleClass === "motorcycle") {
+    return euroScore >= 3;
+  }
+
+  if (vehicleClass === "car") {
+    if (fuelType === "petrol") {
+      return euroScore >= 4;
+    } else if (fuelType === "diesel") {
+      return euroScore >= 6;
+    } else {
+      return false;
+    }
+  }
+
+  return false;
 };
 
 export { fetchAndStoreVehicleData, fetchAndStoreOneAutoAPI };
