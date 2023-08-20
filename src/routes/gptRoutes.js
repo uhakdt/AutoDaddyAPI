@@ -19,6 +19,7 @@ router.post("/summary", async (req, res) => {
   try {
     const data = req.body.extractedData; // Accessing the 'extractedData' key
     const response_text = await GetGPTResponse(data);
+    console.log(response_text);
     res.json(JSON.parse(response_text));
   } catch (e) {
     res.status(400).json({ error: e.message });
