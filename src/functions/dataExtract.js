@@ -193,11 +193,18 @@ function extractVehicleMileage(mileageRecords) {
   }
 
   // Sort mileage records in ascending order of date of information
-  mileageRecords.slice().sort((a, b) => {
-    const dateA = new Date(a.DateOfInformation.split("/").reverse().join("-"));
-    const dateB = new Date(b.DateOfInformation.split("/").reverse().join("-"));
-    return dateB - dateA;
-  });
+  mileageRecords
+    .slice()
+    .sort((a, b) => {
+      const dateA = new Date(
+        a.DateOfInformation.split("/").reverse().join("-")
+      );
+      const dateB = new Date(
+        b.DateOfInformation.split("/").reverse().join("-")
+      );
+      return dateB - dateA;
+    })
+    .reverse();
 
   // Initialize variables
   let firstMileage, lastMileage;
