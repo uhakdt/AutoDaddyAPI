@@ -1,10 +1,11 @@
-function dataExtract(dataMain, vehicleFreeData) {
+function dataExtract(dataMain, vehicleFreeData, isUlezCompliant) {
   let combinedResults =
     extractVehicleInfo(
       dataMain.VehicleAndMotHistory?.VehicleRegistration,
       dataMain.VehicleAndMotHistory?.TechnicalDetails,
       dataMain.VehicleAndMotHistory?.VehicleHistory
     ) +
+    extractULEZCompliance(isUlezCompliant) +
     extractMOTHistory(dataMain.VehicleAndMotHistory?.MotHistory?.RecordList) +
     extractVehicleTAX(
       dataMain.VehicleAndMotHistory?.VehicleRegistration,
@@ -77,6 +78,16 @@ function extractVehicleInfo(
   }
 
   return vehicleInfoResult;
+}
+
+function extractULEZCompliance(isUlezCompliant) {
+  let ulezComplianceResult = "\nTopic: ULEZ Compliance:\n";
+  if (isUlezCompliant) {
+    ulezComplianceResult += "ULEZ Compliant\n";
+  } else {
+    ulezComplianceResult += "ULEZ Not Compliant\n";
+  }
+  return ulezComplianceResult;
 }
 
 function extractMOTHistory(motHistory) {
@@ -293,9 +304,8 @@ function extractOutstandingFinances(financeRecords) {
     financesResults += `Agreement Term: ${record.AgreementTerm} months`;
     financesResults += `Agreement Type: ${record.AgreementType}\n`;
     financesResults += `Finance Company: ${record.FinanceCompany || "N/A"}\n`;
-    financesResults += `Vehicle Description: ${
-      record.VehicleDescription || "N/A"
-    }\n`;
+    financesResults += `Vehicle Description: ${record.VehicleDescription || "N/A"
+      }\n`;
   }
 
   return financesResults;
@@ -411,9 +421,8 @@ function extractWriteOffInfo(vdiCheckFull) {
       let lossType = record.LossType || "N/A";
       let category = record.Category || "N/A";
 
-      writeOffResults += `Write Off Record ${
-        idx + 1
-      }: MiaftrEntryDate: ${miaftrEntryDate}, LossDate: ${lossDate}, LossType: ${lossType}, Category: ${category}\n`;
+      writeOffResults += `Write Off Record ${idx + 1
+        }: MiaftrEntryDate: ${miaftrEntryDate}, LossDate: ${lossDate}, LossType: ${lossType}, Category: ${category}\n`;
     }
   }
 

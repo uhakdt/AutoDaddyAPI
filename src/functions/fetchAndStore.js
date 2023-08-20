@@ -129,7 +129,13 @@ const fetchAndStoreVehicleData = async (
       uid
     );
 
-    let extractedData = dataExtract(dataMain, vehicleFreeData);
+    let isUlezCompliant = IsULEZCompliant(
+      dataMain.VehicleAndMotHistory?.VehicleRegistration?.FuelType,
+      dataMain.VehicleAndMotHistory?.TechnicalDetails?.General?.EuroStatus,
+      dataMain.VehicleAndMotHistory?.VehicleRegistration?.VehicleClass
+    )
+
+    let extractedData = dataExtract(dataMain, vehicleFreeData, isUlezCompliant);
 
     await orderDoc.set({
       orderId: orderId,
@@ -137,11 +143,7 @@ const fetchAndStoreVehicleData = async (
       paymentId: paymentId,
       data: dataMain,
       extractedData: extractedData,
-      ulez: IsULEZCompliant(
-        dataMain.VehicleAndMotHistory?.VehicleRegistration?.FuelType,
-        dataMain.VehicleAndMotHistory?.TechnicalDetails?.General?.EuroStatus,
-        dataMain.VehicleAndMotHistory?.VehicleRegistration?.VehicleClass
-      ),
+      ulez: isUlezCompliant,
       dateTime: currentDateTime,
       vehicleFreeData: vehicleFreeData,
       gptRequested: false,
@@ -336,7 +338,7 @@ const createPdfAndUploadToStorage = async (uid, vehicleRegMark, orderId) => {
 
     // Create stream for PDF
     const readable = new stream.Readable();
-    readable._read = () => {};
+    readable._read = () => { };
     readable.push(markdownText);
     readable.push(null);
 
