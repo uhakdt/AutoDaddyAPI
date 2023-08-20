@@ -193,11 +193,11 @@ function extractVehicleMileage(mileageRecords) {
   }
 
   // Sort mileage records in ascending order of date of information
-  mileageRecords.sort(
-    (a, b) =>
-      new Date(a["DateOfInformation"] || "01/01/1900") -
-      new Date(b["DateOfInformation"] || "01/01/1900")
-  );
+  mileageRecords.slice().sort((a, b) => {
+    const dateA = new Date(a.DateOfInformation.split("/").reverse().join("-"));
+    const dateB = new Date(b.DateOfInformation.split("/").reverse().join("-"));
+    return dateB - dateA;
+  });
 
   // Initialize variables
   let firstMileage, lastMileage;
@@ -304,8 +304,9 @@ function extractOutstandingFinances(financeRecords) {
     financesResults += `Agreement Term: ${record.AgreementTerm} months`;
     financesResults += `Agreement Type: ${record.AgreementType}\n`;
     financesResults += `Finance Company: ${record.FinanceCompany || "N/A"}\n`;
-    financesResults += `Vehicle Description: ${record.VehicleDescription || "N/A"
-      }\n`;
+    financesResults += `Vehicle Description: ${
+      record.VehicleDescription || "N/A"
+    }\n`;
   }
 
   return financesResults;
@@ -421,8 +422,9 @@ function extractWriteOffInfo(vdiCheckFull) {
       let lossType = record.LossType || "N/A";
       let category = record.Category || "N/A";
 
-      writeOffResults += `Write Off Record ${idx + 1
-        }: MiaftrEntryDate: ${miaftrEntryDate}, LossDate: ${lossDate}, LossType: ${lossType}, Category: ${category}\n`;
+      writeOffResults += `Write Off Record ${
+        idx + 1
+      }: MiaftrEntryDate: ${miaftrEntryDate}, LossDate: ${lossDate}, LossType: ${lossType}, Category: ${category}\n`;
     }
   }
 
