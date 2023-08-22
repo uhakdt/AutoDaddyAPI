@@ -5,11 +5,9 @@ const conversations = new Map();
 
 export default function webSocket(io) {
   io.on("connection", (socket) => {
-    console.log("A user connected");
     conversations.set(socket.id, []);
 
     socket.on("disconnect", () => {
-      console.log("Client disconnected");
       conversations.delete(socket.id);
     });
 

@@ -6,6 +6,7 @@ import stream from "stream";
 import markdownpdf from "markdown-pdf";
 import dataExtract from "./dataExtract.js";
 import sendEmail from "../email.js";
+import { log, logException } from "../logger.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -82,7 +83,6 @@ const fetchAndStoreVehicleData = async (
         }
       }
 
-      console.log("All data fetched successfully.");
       return dataObject;
     };
 
@@ -133,7 +133,7 @@ const fetchAndStoreVehicleData = async (
       dataMain.VehicleAndMotHistory?.VehicleRegistration?.FuelType,
       dataMain.VehicleAndMotHistory?.TechnicalDetails?.General?.EuroStatus,
       dataMain.VehicleAndMotHistory?.VehicleRegistration?.VehicleClass
-    )
+    );
 
     let extractedData = dataExtract(dataMain, vehicleFreeData, isUlezCompliant);
 
@@ -163,9 +163,13 @@ const fetchAndStoreVehicleData = async (
     const url = `${process.env["CLIENT_DOMAIN"]}/dashboard?orderId=${orderId}`;
     await sendEmail(email, url);
 
+    log("Data fetching and storage successful for RegNum: " + vehicleRegMark);
     return { success: true, orderId: orderId };
   } catch (error) {
-    console.error("Error:", error);
+    logException(
+      `Error in fetchAndStoreVehicleData for RegNum: ${vehicleFreeData.RegistrationNumber.toString()}`,
+      error
+    );
     throw error;
   }
 };
@@ -293,7 +297,6 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
   // const gptResponse = await axios
   //   .post("https://autodaddy-gpt.uhakdt.repl.co/chat", gptBody)
   //   .then((response) => {
-  //     console.log(data);
   //     return response.data;
   //   })
   //   .catch((error) => {
@@ -338,7 +341,7 @@ const createPdfAndUploadToStorage = async (uid, vehicleRegMark, orderId) => {
 
     // Create stream for PDF
     const readable = new stream.Readable();
-    readable._read = () => { };
+    readable._read = () => {};
     readable.push(markdownText);
     readable.push(null);
 

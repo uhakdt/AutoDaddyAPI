@@ -1,13 +1,15 @@
 import express from "express";
 import { db, storage } from "../firebase.js";
 import crypto from "crypto";
+import { log, logException, trackRequest } from "../logger.js";
 
 const router = express.Router();
 
 // FIREBASE API - Download Report
 router.post("/download-report", async (req, res) => {
-  console.log("ﷺ ﷽");
   try {
+    log("Received request to download report.");
+
     // Create signed URL
     const bucket = storage.bucket();
     const [url] = await bucket
@@ -18,24 +20,35 @@ router.post("/download-report", async (req, res) => {
       });
 
     res.json({ url });
+
+    trackRequest({
+      name: "POST /download-report",
+      resultCode: 200,
+      success: true,
+    });
   } catch (error) {
-    console.error("Error getting download URL:", error);
+    logException(error);
     res.status(500).send("Error getting download URL");
+
+    trackRequest({
+      name: "POST /download-report",
+      resultCode: 500,
+      success: false,
+    });
   }
 });
 
 router.post("/data-deletion", async (req, res) => {
-  const signed_request = req.body.signed_request;
-  const data = parse_signed_request(signed_request);
-
-  if (!data) {
-    return res.status(400).send("Invalid signed request.");
-  }
-
-  const user_id = data.user_id;
-
   try {
-    await admin.auth().deleteUser(user_id);
+    log("Received request for data deletion.");
+
+    const data = parse_signed_request(req.body.signed_request);
+
+    if (!data) {
+      throw new Error("Invalid signed request.");
+    }
+
+    await admin.auth().deleteUser(data.user_id);
 
     const confirmation_code = generateUniqueCode();
     const status_url = `https://www.autodaddy.co.uk/deletion?id=${confirmation_code}`;
@@ -44,9 +57,30 @@ router.post("/data-deletion", async (req, res) => {
       url: status_url,
       confirmation_code: confirmation_code,
     });
+
+    trackRequest({
+      name: "POST /data-deletion",
+      resultCode: 200,
+      success: true,
+    });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).send("Error deleting user.");
+    logException(error);
+
+    if (error.message === "Invalid signed request.") {
+      res.status(400).send(error.message);
+      trackRequest({
+        name: "POST /data-deletion",
+        resultCode: 400,
+        success: false,
+      });
+    } else {
+      res.status(500).send("Error deleting user.");
+      trackRequest({
+        name: "POST /data-deletion",
+        resultCode: 500,
+        success: false,
+      });
+    }
   }
 });
 
@@ -63,7 +97,7 @@ function parse_signed_request(signed_request) {
     .digest("base64");
 
   if (sig !== expected_sig) {
-    console.error("Bad Signed JSON signature!");
+    logException(new Error("Bad Signed JSON signature!"));
     return null;
   }
 

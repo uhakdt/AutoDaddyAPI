@@ -7,9 +7,9 @@ import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
-import logger from "./logger.js";
 import parseBody from "./parseBody.js";
 import serveWellKnownStaticFile from "./staticFiles.js";
+import { log } from "./logger.js";
 
 dotenv.config();
 
@@ -17,14 +17,18 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   path: "/api/v1/chat",
-  cors: { origin: "*" },
+  cors: {
+    origin: [
+      "https://autodaddy.co.uk",
+      "https://autodaddy.loca.lt",
+      "http://localhost:3000",
+    ],
+  },
 });
 
 app.use(parseBody);
 
 app.use("/.well-known", serveWellKnownStaticFile);
-
-app.use(logger);
 
 app.use(compression());
 
@@ -36,15 +40,27 @@ app.use(
   })
 );
 
+app.use(hpp());
+
+app.use(
+  cors({
+    origin: [
+      "https://autodaddy.co.uk",
+      "https://autodaddy.loca.lt",
+      "http://localhost:3000",
+    ],
+  })
+);
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // limit each IP to 5 requests per windowMs
+  handler: function (req, res, next) {
+    log(`Rate limit exceeded: ${req.ip}`);
+    res.status(429).send("Too many requests, please try again later.");
+  },
 });
 
 app.use(limiter);
-
-app.use(hpp());
-
-app.use(cors({ origin: "*" }));
 
 export { app, server, io };

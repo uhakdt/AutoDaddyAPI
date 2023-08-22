@@ -1,30 +1,25 @@
-import morgan from "morgan";
-import rfs from "rotating-file-stream";
-import path from "path";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+import appInsights from "applicationinsights";
+import dotenv from "dotenv";
+dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+appInsights.setup(process.env["AZURE_LOGGER_INSTRUMENTATION_KEY"]).start();
 
-const generator = (time) => {
-  if (!time) time = new Date();
-  return `${time.getDate()}-${(time.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${time.getFullYear()}.log`;
-};
+const client = appInsights.defaultClient;
 
-const accessLogStream = rfs.createStream(generator, {
-  interval: "1d",
-  path: path.join(__dirname, "../logs"),
-  maxSize: "10M",
-  maxFiles: 10,
-});
+function log(message) {
+  client.trackTrace({ message });
+}
 
-morgan.token("datetime", () => new Date().toLocaleString());
+function logException(exception) {
+  client.trackException({ exception });
+}
 
-const logger = morgan("[:datetime] :status :url :method :response-time ms", {
-  stream: accessLogStream,
-});
+function trackRequest({ name, resultCode, success }) {
+  client.trackRequest({
+    name: name,
+    resultCode: resultCode,
+    success: success,
+  });
+}
 
-export default logger;
+export { log, logException, trackRequest };
