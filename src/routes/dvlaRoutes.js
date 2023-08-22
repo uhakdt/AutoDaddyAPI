@@ -1,12 +1,11 @@
 import express from "express";
 import axios from "axios";
-import { log, logException, trackRequest } from "../logger.js";
 
 const router = express.Router();
 
 // DVLA - Vehicle Free Data
 router.post("/:registrationNumber", async (req, res) => {
-  log(
+  console.log(
     `Received request for registration number: ${req.params.registrationNumber}`
   );
 
@@ -26,14 +25,14 @@ router.post("/:registrationNumber", async (req, res) => {
     const response = await axios(config);
     res.send(response.data);
 
-    trackRequest({
+    console.log({
       name: `POST /:registrationNumber - ${req.params.registrationNumber}`,
       resultCode: 200,
       success: true,
     });
   } catch (error) {
     if (error.response) {
-      logException(error.response.data);
+      console.error(error.response.data);
 
       if (error.response.status === 404) {
         res.status(404).send({ message: "Registration number not found" });
@@ -42,16 +41,16 @@ router.post("/:registrationNumber", async (req, res) => {
       }
     } else if (error.request) {
       // The request was made but no response was received
-      logException("No response received from the DVLA API.");
+      console.error("No response received from the DVLA API.");
       res
         .status(500)
         .send({ message: "Failed to get a response from the DVLA API." });
     } else {
-      logException(error.message);
+      console.error(error.message);
       res.status(500).send({ message: "Internal server error." });
     }
 
-    trackRequest({
+    console.log({
       name: `POST /:registrationNumber - ${req.params.registrationNumber}`,
       resultCode: (error.response && error.response.status) || 500,
       success: false,

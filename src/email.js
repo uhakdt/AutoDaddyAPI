@@ -3,7 +3,6 @@ import nodemailer from "nodemailer";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
-import { log, logException } from "./logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,7 +42,7 @@ const readEmailTemplate = (url) => {
 
 const sendEmail = async (email, url) => {
   try {
-    log("Attempting to send email...");
+    console.log("Attempting to send email...");
 
     const transport = await createTransport();
     const emailTemplate = readEmailTemplate(url);
@@ -56,11 +55,11 @@ const sendEmail = async (email, url) => {
     };
 
     const result = await transport.sendMail(mailOptions);
-    log("Email sent successfully.");
+    console.log("Email sent successfully.");
 
     return result;
   } catch (error) {
-    logException(error);
+    console.error(error);
     throw new Error("Failed to send email.");
   }
 };

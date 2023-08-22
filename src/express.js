@@ -9,7 +9,6 @@ import rateLimit from "express-rate-limit";
 import hpp from "hpp";
 import parseBody from "./parseBody.js";
 import serveWellKnownStaticFile from "./staticFiles.js";
-import { log } from "./logger.js";
 
 dotenv.config();
 
@@ -56,7 +55,7 @@ const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 20, // limit each IP to 5 requests per windowMs
   handler: function (req, res, next) {
-    log(`Rate limit exceeded: ${req.ip}`);
+    console.log(`Rate limit exceeded: ${req.ip}`);
     res.status(429).send("Too many requests, please try again later.");
   },
 });

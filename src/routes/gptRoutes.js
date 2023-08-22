@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
-import { log, logException, trackRequest } from "../logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +41,7 @@ async function getGPTResponse(data) {
 
     return response.data.choices[0].message.content;
   } catch (error) {
-    logException(error);
+    console.error(error);
     throw new Error("Failed to retrieve response from OpenAI.");
   }
 }
@@ -52,8 +51,8 @@ router.post("/summary", async (req, res) => {
     const data = req.body.extractedData; // Accessing the 'extractedData' key
     const responseText = await getGPTResponse(data);
 
-    log(`Received response from OpenAI: ${responseText}`);
-    trackRequest({
+    console.log(`Received response from OpenAI: ${responseText}`);
+    console.log({
       name: "POST /summary",
       resultCode: 200,
       success: true,
@@ -61,8 +60,8 @@ router.post("/summary", async (req, res) => {
 
     res.json(JSON.parse(responseText));
   } catch (error) {
-    logException(error);
-    trackRequest({
+    console.error(error);
+    console.log({
       name: "POST /summary",
       resultCode: 400,
       success: false,

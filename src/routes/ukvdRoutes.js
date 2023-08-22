@@ -1,6 +1,5 @@
 import express from "express";
 import axios from "axios";
-import { log, logException } from "../logger.js"; // Adjust the path to your logger
 
 const router = express.Router();
 
@@ -21,7 +20,7 @@ router.get("/vehicleimagedata/:registrationNumber", async (req, res) => {
 });
 
 const fetchDataFromUKVD = async (req, res, baseUrl) => {
-  log(
+  console.log(
     `Fetching data for registration number: ${req.params.registrationNumber}`
   );
 
@@ -37,7 +36,7 @@ const fetchDataFromUKVD = async (req, res, baseUrl) => {
     const response = await axios(config);
     res.send(response.data);
   } catch (error) {
-    logException(error);
+    console.error(error);
 
     const errorMessage =
       error.response && error.response.data && error.response.data.message

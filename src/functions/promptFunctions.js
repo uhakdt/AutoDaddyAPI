@@ -1,11 +1,9 @@
-import { log, logException } from "../logger.js";
-
 function GenerateBasePrompt(userInput, carData) {
-  log("Generating base prompt with user input and car data.");
+  console.log("Generating base prompt with user input and car data.");
 
   if (typeof userInput !== "string" || typeof carData !== "string") {
     const error = new Error("Both userInput and carData should be strings.");
-    logException(error);
+    console.error(error);
     throw error;
   }
 
@@ -23,7 +21,7 @@ function GenerateBasePrompt(userInput, carData) {
 
   const prompt = `${userInput}${guidingPrinciples}\n\nGiven Data: ${carData}`;
 
-  log("Base prompt generated successfully.");
+  console.log("Base prompt generated successfully.");
 
   return prompt;
 }

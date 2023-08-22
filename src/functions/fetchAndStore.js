@@ -6,7 +6,6 @@ import stream from "stream";
 import markdownpdf from "markdown-pdf";
 import dataExtract from "./dataExtract.js";
 import sendEmail from "../email.js";
-import { log, logException } from "../logger.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -163,10 +162,12 @@ const fetchAndStoreVehicleData = async (
     const url = `${process.env["CLIENT_DOMAIN"]}/dashboard?orderId=${orderId}`;
     await sendEmail(email, url);
 
-    log("Data fetching and storage successful for RegNum: " + vehicleRegMark);
+    console.log(
+      "Data fetching and storage successful for RegNum: " + vehicleRegMark
+    );
     return { success: true, orderId: orderId };
   } catch (error) {
-    logException(
+    console.error(
       `Error in fetchAndStoreVehicleData for RegNum: ${vehicleFreeData.RegistrationNumber.toString()}`,
       error
     );

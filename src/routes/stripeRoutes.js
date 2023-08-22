@@ -1,7 +1,6 @@
 import express from "express";
 import { stripe, endpointSecret } from "../stripe.js";
 import { fetchAndStoreVehicleData } from "../functions/fetchAndStore.js";
-import { log, logException } from "../logger.js";
 
 const router = express.Router();
 
@@ -10,14 +9,14 @@ router.post("/create-payment-intent", async (req, res) => {
   try {
     const paymentIntent = await createPaymentIntent(req.body);
 
-    log(`Payment intent created: ${paymentIntent.id}`);
+    console.log(`Payment intent created: ${paymentIntent.id}`);
 
     res.send({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
     });
   } catch (error) {
-    logException(error);
+    console.error(error);
     res.status(500).send({ error: error.message });
   }
 });
@@ -34,7 +33,7 @@ router.post("/webhook", async (req, res) => {
       res.status(400).send("Unsupported event type");
     }
   } catch (error) {
-    logException(error);
+    console.error(error);
     res.status(error.httpStatusCode || 500).send(error.message);
   }
 });
@@ -45,7 +44,7 @@ router.post("/update-payment-intent", async (req, res) => {
     await updatePaymentIntent(req.body);
     res.status(204).end();
   } catch (error) {
-    logException(error);
+    console.error(error);
     res.status(500).send({ error: error.message });
   }
 });
