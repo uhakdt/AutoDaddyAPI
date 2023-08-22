@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
-import { log, logException } from "../logger.js";
+import { log, logException } from "./logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
