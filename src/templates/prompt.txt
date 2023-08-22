@@ -1,7 +1,6 @@
 I want you to write several summaries. Firstly:
 -----
-*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT*
-
+*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE*
 Core Guidelines:
 Immediate Insights: Dive directly into the essence of the data without superfluous introductions.
 Data Synthesis: Meld different data points to form cohesive insights, rather than isolated comments.
@@ -55,69 +54,66 @@ Import/Export: Legal implications of import/export patterns.
 Write-Off: Category implications juxtaposed with MOT outcomes.
 VIC: The car's history in light of VIC’s relevance.
 
-*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT*
-
+*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE*
 THE FOLLOWING IS THE MOST IMPORTANT!
 I WANT YOU TO ONLY REPLY WITH THE FOLLOWING TYPE OF RESPONSE - IT SHOULD BE A JSON format like this:
-*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT*
-
-\{
-    "summary": \{
+*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE*
+{
+    "summary": {
         "rating": "",
         "estimated_valuation": "THIS SHOULD BE A NUMBER IN BRITISH POUNDS",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "main_details_analysis": \{
+    },
+    "main_details_analysis": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "energy_&_consumption_analysis": \{
+    },
+    "energy_&_consumption_analysis": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "mot_metrics_analysis": \{
+    },
+    "mot_metrics_analysis": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "tax_details_analysis": \{
+    },
+    "tax_details_analysis": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "mileage_analysis": \{
+    },
+    "mileage_analysis": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "plate_changes": \{
+    },
+    "plate_changes": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "outstanding_finances": \{
+    },
+    "outstanding_finances": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "important_checks": \{
+    },
+    "important_checks": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "stolen": \{
+    },
+    "stolen": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "import_/_export": \{
+    },
+    "import_/_export": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "write_off": \{
+    },
+    "write_off": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \},
-    "vic_inspected": \{
+    },
+    "vic_inspected": {
         "rating": "",
         "content": "SHOULD NOT INCLUDE Topic: at the beginning."
-    \}
-\}
+    }
+}
 
 I ONLY WANT YOU TO RESPOND WITH NOTHING ELSE BUT THAT POPULATED JSON FILE WITH THE CORRESPONDING VALUES!! ANYTHING ELSE AND EVERYHING IS RUINED!!!!
 **DONT FORGET I WANT IT IN THAT EXACT JSON FORMAT**
-*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT*
-Data:
+*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE*Data:
