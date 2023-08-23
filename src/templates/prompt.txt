@@ -1,5 +1,6 @@
 I want you to write several summaries. Firstly:
 -----
+*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE*
 Core Guidelines:
 Immediate Insights: Dive directly into the essence of the data without superfluous introductions.
 Data Synthesis: Meld different data points to form cohesive insights, rather than isolated comments.
@@ -54,60 +55,65 @@ Write-Off: Category implications juxtaposed with MOT outcomes.
 VIC: The car's history in light of VIC’s relevance.
 
 *MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE. HERE IS THE JSON FORMAT:*
+
+Using only the format below, provide a vehicle analysis. Do not include any other text or explanation outside of this JSON format.
 {
     "summary": {
-        "rating": "",
-        "estimated_valuation": "THIS SHOULD BE A NUMBER IN BRITISH POUNDS",
-        "content": ""
+        "rating": "Provide the rating here (e.g., Excellent, Good, Average, Poor)",
+        "estimated_valuation": "Provide the valuation in British Pounds (e.g., £15,000)",
+        "content": "Provide a brief summary content here"
     },
     "main_details_analysis": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about main details analysis"
     },
     "energy_&_consumption_analysis": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about energy and consumption analysis"
     },
     "mot_metrics_analysis": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about MOT metrics"
     },
     "tax_details_analysis": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about tax details"
     },
     "mileage_analysis": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about mileage analysis"
     },
     "plate_changes": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about plate changes"
     },
     "outstanding_finances": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about any outstanding finances"
     },
     "important_checks": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about important checks"
     },
     "stolen": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about stolen checks"
     },
     "import_/_export": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about import/export checks"
     },
     "write_off": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about write-off checks"
     },
     "vic_inspected": {
-        "rating": "",
-        "content": ""
+        "rating": "Provide the rating here",
+        "content": "Provide content about VIC inspections"
     }
 }
+Note: Replace the placeholder text with the respective information.
 
-Data for the car which you will use in order to populate the above json:
+I ONLY WANT YOU TO RESPOND WITH NOTHING ELSE BUT THAT POPULATED JSON FILE WITH THE CORRESPONDING VALUES!! ANYTHING ELSE AND EVERYHING IS RUINED!!!!
+**DONT FORGET I WANT IT IN THAT EXACT JSON FORMAT**
+*MOST IMPORTANT GUIDELINE - EVERYTHING ELSE IS NOT AS IMPORTANT - MAKE SURE TO ADHERE TO THE JSON FORMAT THAT I WILL SHOW YOU IN A BIT - IN YOUR RESPONSE I ONLY WANT THE JSON NOTHING ELSE. MEANING YOUR RESPONSE SHOULD START WITH CURLY BRACES AND END WITH CURLY BRACES AND NOTHING ELSE*Data:
