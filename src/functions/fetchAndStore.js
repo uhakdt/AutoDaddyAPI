@@ -1,9 +1,6 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { db, storage } from "../firebase.js";
-import fs from "fs";
-import stream from "stream";
-import markdownpdf from "markdown-pdf";
 import dataExtract from "./dataExtract.js";
 import sendEmail from "../email.js";
 
@@ -148,16 +145,6 @@ const fetchAndStoreVehicleData = async (
       gptRequested: false,
       gptChatRequestNumber: 20,
     });
-
-    try {
-      await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
-    } catch (error) {
-      console.error(
-        "Error occurred while creating or uploading the PDF:",
-        error
-      );
-      throw error;
-    }
 
     const url = `${process.env["CLIENT_DOMAIN"]}/dashboard?orderId=${orderId}`;
     await sendEmail(email, url);
@@ -319,65 +306,6 @@ const fetchAndStoreOneAutoAPI = async (email, vehicleFreeData, paymentId) => {
       console.error("Error writing order to database:", error);
       throw error;
     });
-
-  try {
-    await createPdfAndUploadToStorage(uid, vehicleRegMark, orderId);
-  } catch (error) {
-    console.error("Error occurred while creating or uploading the PDF:", error);
-    throw error;
-  }
-};
-
-const createPdfAndUploadToStorage = async (uid, vehicleRegMark, orderId) => {
-  try {
-    let filename = `${vehicleRegMark}_${orderId}.pdf`;
-
-    // Markdown to PDF
-    let markdown = fs.readFileSync(
-      path.join(__dirname, "../templates/reportTemplate.md"),
-      "utf8"
-    );
-    let yourVariable = "﷽";
-    let markdownText = markdown.replace("An h1 header", yourVariable);
-
-    // Create stream for PDF
-    const readable = new stream.Readable();
-    readable._read = () => {};
-    readable.push(markdownText);
-    readable.push(null);
-
-    // Convert markdown to PDF
-    const pdfStream = readable.pipe(markdownpdf());
-
-    // Create writable stream to Firebase storage
-    const bucket = storage.bucket();
-    const filePath = `user_files/${uid}/reports/${filename}`;
-    const file = bucket.file(filePath);
-    const writeStream = file.createWriteStream({
-      metadata: {
-        contentType: "application/pdf",
-      },
-    });
-
-    pdfStream.pipe(writeStream);
-
-    await new Promise((resolve, reject) => {
-      writeStream.on("finish", resolve);
-      writeStream.on("error", (error) => {
-        console.error(
-          "Error occurred while writing to Firebase Storage:",
-          error
-        );
-        reject(error);
-      });
-    });
-  } catch (error) {
-    console.error(
-      "Error occurred while creating the PDF or initiating upload:",
-      error
-    );
-    throw error;
-  }
 };
 
 const IsULEZCompliant = (fuelType, euroScore, vehicleClass) => {
