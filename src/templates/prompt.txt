@@ -60,7 +60,6 @@ Using only the format below, provide a vehicle analysis. Do not include any othe
 {
     "summary": {
         "rating": "Provide the rating here (e.g., Excellent, Good, Average, Poor)",
-        "estimated_valuation": "Provide the valuation in British Pounds (e.g., £15,000)",
         "content": "Provide a brief summary content here"
     },
     "main_details_analysis": {
