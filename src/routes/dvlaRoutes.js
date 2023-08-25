@@ -5,10 +5,6 @@ const router = express.Router();
 
 // DVLA - Vehicle Free Data
 router.post("/:registrationNumber", async (req, res) => {
-  console.log(
-    `Received request for registration number: ${req.params.registrationNumber}`
-  );
-
   var config = {
     method: "post",
     url: process.env["VEHICLE_FREE_DATA_URL"],

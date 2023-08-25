@@ -5,7 +5,6 @@ const router = express.Router();
 
 // ONE AUTO API - UK Vehicle Data
 router.get("/ukvd/:registrationNumber", async (req, res) => {
-  console.log("ﷺ ﷽");
   var config = {
     method: "get",
     url:
@@ -29,7 +28,6 @@ router.get("/ukvd/:registrationNumber", async (req, res) => {
 
 // ONE AUTO API - Experian
 router.get("/experian/:registrationNumber", async (req, res) => {
-  console.log("ﷺ ﷽");
   var config = {
     method: "get",
     url:
@@ -53,7 +51,6 @@ router.get("/experian/:registrationNumber", async (req, res) => {
 
 // ONE AUTO API - Car Guide - Salvage Check
 router.get("/carguide/salvagecheck/:registrationNumber", async (req, res) => {
-  console.log("ﷺ ﷽");
   var config = {
     method: "get",
     url:
@@ -77,7 +74,6 @@ router.get("/carguide/salvagecheck/:registrationNumber", async (req, res) => {
 
 // ONE AUTO API - Car Guide - MOT
 router.get("/carguide/mot/:registrationNumber", async (req, res) => {
-  console.log("ﷺ ﷽");
   var config = {
     method: "get",
     url:
@@ -103,7 +99,6 @@ router.get("/carguide/mot/:registrationNumber", async (req, res) => {
 router.get(
   "/autotrader/valuation/:registrationNumber/:currentMileage/:vehicleCondition",
   async (req, res) => {
-    console.log("ﷺ ﷽");
     var config = {
       method: "get",
       url:

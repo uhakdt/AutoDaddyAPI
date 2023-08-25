@@ -51,7 +51,6 @@ router.post("/summary", async (req, res) => {
     const data = req.body.extractedData; // Accessing the 'extractedData' key
     const responseText = await getGPTResponse(data);
 
-    console.log(`Received response from OpenAI: ${responseText}`);
     console.log({
       name: "POST /summary",
       resultCode: 200,

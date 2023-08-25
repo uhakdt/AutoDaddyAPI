@@ -20,10 +20,6 @@ router.get("/vehicleimagedata/:registrationNumber", async (req, res) => {
 });
 
 const fetchDataFromUKVD = async (req, res, baseUrl) => {
-  console.log(
-    `Fetching data for registration number: ${req.params.registrationNumber}`
-  );
-
   const config = {
     method: "get",
     url: baseUrl + req.params.registrationNumber,
@@ -34,6 +30,11 @@ const fetchDataFromUKVD = async (req, res, baseUrl) => {
 
   try {
     const response = await axios(config);
+    console.log({
+      name: `GET /:registrationNumber - ${req.params.registrationNumber}`,
+      resultCode: 200,
+      success: true,
+    });
     res.send(response.data);
   } catch (error) {
     console.error(error);

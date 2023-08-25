@@ -42,8 +42,6 @@ const readEmailTemplate = (url) => {
 
 const sendEmail = async (email, url) => {
   try {
-    console.log("Attempting to send email...");
-
     const transport = await createTransport();
     const emailTemplate = readEmailTemplate(url);
 
@@ -55,8 +53,6 @@ const sendEmail = async (email, url) => {
     };
 
     const result = await transport.sendMail(mailOptions);
-    console.log("Email sent successfully.");
-
     return result;
   } catch (error) {
     console.error(error);

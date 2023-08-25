@@ -148,17 +148,13 @@ const fetchAndStoreVehicleData = async (
 
     const url = `${process.env["CLIENT_DOMAIN"]}/dashboard?orderId=${orderId}`;
     await sendEmail(email, url);
-
-    console.log(
-      "Data fetching and storage successful for RegNum: " + vehicleRegMark
-    );
-    return { success: true, orderId: orderId };
+    return {
+      success: true,
+      orderId: orderId,
+      message: "Order created successfully",
+    };
   } catch (error) {
-    console.error(
-      `Error in fetchAndStoreVehicleData for RegNum: ${vehicleFreeData.RegistrationNumber.toString()}`,
-      error
-    );
-    throw error;
+    return { success: false, message: error.message };
   }
 };
 
