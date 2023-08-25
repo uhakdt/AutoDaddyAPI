@@ -159,23 +159,28 @@ function extractVehicleTAX(vehicleRegistration, vehicleFreeData) {
   let vehicleTaxResult = "\nTopic: Tax Details:\n";
 
   // Calculate the days left for tax due date
-  let taxDueDateStr = vehicleFreeData["TaxDueDate"] || "1900-01-01";
-  let taxDueDate = new Date(taxDueDateStr);
-  let currentDate = new Date();
-  let timeDiff = taxDueDate - currentDate;
-  let daysLeft =
-    timeDiff > 0 ? Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) : "N/A";
+  const taxDueDateStr = vehicleFreeData["TaxDueDate"] || "1900-01-01";
+  const taxDueDate = new Date(taxDueDateStr);
+  const currentDate = new Date();
+  const daysLeft =
+    taxDueDate > currentDate
+      ? Math.ceil((taxDueDate - currentDate) / (1000 * 60 * 60 * 24))
+      : "N/A";
 
   // Create a dictionary to hold the required tax details
-  let taxInfo = {
+  const taxInfo = {
     "Tax Status": vehicleFreeData["TaxStatus"] || "N/A",
     "Days Left": daysLeft,
     "Vehicle Class": vehicleRegistration["VehicleClass"] || "N/A",
   };
 
-  for (let [key, value] of Object.entries(taxInfo)) {
+  // Append tax details to the result string
+  for (const [key, value] of Object.entries(taxInfo)) {
     vehicleTaxResult += `${key}: ${value}\n`;
   }
+
+  // Append additional message
+  vehicleTaxResult += `\nThe tax or SORN isnt passed on when you sell a vehicle or transfer ownership to someone else. This includes giving it to a member of your family.\n`;
 
   return vehicleTaxResult;
 }
