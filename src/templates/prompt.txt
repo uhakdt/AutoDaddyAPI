@@ -45,7 +45,7 @@ Main Details: Model's positioning, fuel type implications, engine efficiency ver
 Energy & Consumption: Comprehensive energy profile – how power, torque, consumption patterns, and emissions intertwine.
 MOT Metrics: What do MOT patterns and specific failures reveal?
 Tax and Legal: Tax status and upcoming obligations.
-Mileage: Evaluate mileage legitimacy and identify anomalies.
+Mileage: Evaluate mileage and average mileage.
 Plate Changes: Investigate reasons behind plate transitions.
 Outstanding finances: Illuminate the car's financial history and current status.
 Important Checks: From VIN to V5c, assess the car's legitimacy.

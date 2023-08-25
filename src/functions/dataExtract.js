@@ -67,7 +67,7 @@ function extractVehicleInfo(
     vehicleInfoResult += `${key}: ${mainDetails[key]}\n`;
   }
 
-  vehicleInfoResult += "Keeper's Details:\n";
+  vehicleInfoResult += "\nKeeper's Details:\n";
   for (let key in keeperDetails) {
     vehicleInfoResult += `${key}: ${keeperDetails[key]}\n`;
   }
@@ -181,8 +181,6 @@ function extractVehicleTAX(vehicleRegistration, vehicleFreeData) {
 }
 
 function extractVehicleMileage(mileageRecords) {
-  let mileageResult = "\nTopic: Mileage\n";
-
   // Ensure there are records to extract
   if (
     mileageRecords === null ||
@@ -193,7 +191,7 @@ function extractVehicleMileage(mileageRecords) {
   }
 
   // Sort mileage records in ascending order of date of information
-  mileageRecords
+  const sortedMileageRecords = mileageRecords
     .slice()
     .sort((a, b) => {
       const dateA = new Date(
@@ -206,58 +204,29 @@ function extractVehicleMileage(mileageRecords) {
     })
     .reverse();
 
-  // Initialize variables
-  let firstMileage, lastMileage;
-  let firstRecordDate, lastRecordDate;
-  let anomaly = false;
-  let totalRecords = 0;
+  const firstRecord = sortedMileageRecords[0];
+  const lastRecord = sortedMileageRecords[sortedMileageRecords.length - 1];
 
-  // Iterate over mileage records
-  for (let record of mileageRecords) {
-    let recordDate = record["DateOfInformation"] || "01/01/1900";
-    let mileage = record["Mileage"];
-    if (!mileage) {
-      continue;
-    }
+  const firstMileage = parseInt(firstRecord.Mileage, 10);
+  const lastMileage = parseInt(lastRecord.Mileage, 10);
 
-    // Initialize first record date and first mileage
-    if (!firstRecordDate) {
-      firstRecordDate = recordDate;
-      firstMileage = mileage;
-    }
+  const firstYear = new Date(
+    firstRecord.DateOfInformation.split("/").reverse().join("-")
+  ).getFullYear();
+  const lastYear = new Date(
+    lastRecord.DateOfInformation.split("/").reverse().join("-")
+  ).getFullYear();
 
-    // Update last record date and last mileage
-    lastRecordDate = recordDate;
-    lastMileage = mileage;
+  const years = lastYear - firstYear;
+  const totalMileage = lastMileage - firstMileage;
+  const averageMileage =
+    years !== 0 ? (totalMileage / years).toFixed(0) : "N/A";
 
-    // Check for mileage anomaly
-    if (lastMileage < firstMileage) {
-      anomaly = true;
-    }
-
-    totalRecords++;
-  }
-
-  // Ensure there were records with mileage
-  if (!firstMileage || !lastMileage || !totalRecords) {
-    return "No valid mileage records available.";
-  }
-
-  // Calculate average mileage per year
-  let firstYear = parseInt(firstRecordDate.split("/")[2]);
-  let lastYear = parseInt(lastRecordDate.split("/")[2]);
-  let years = lastYear - firstYear;
-  let totalMileage = lastMileage - firstMileage;
-  let averageMileage = years !== 0 ? totalMileage / years : "N/A";
-
-  mileageResult += `Odometer: ${lastMileage}\n`;
-  mileageResult += `No. of mileage registrations: ${totalRecords}\n`;
-  mileageResult += `Anomaly: ${anomaly}\n`;
-  mileageResult += `First Registration: ${firstRecordDate}\n`;
-  mileageResult += `Last Registration: ${lastRecordDate}\n`;
-  mileageResult += `Average Mileage: ${averageMileage}\n`;
-
-  return mileageResult;
+  return `
+  Topic: Mileage
+  Total Mileage: ${totalMileage} miles
+  Average Mileage: ${averageMileage} miles per year
+  `;
 }
 
 function extractPlateChanges(plateRecords) {
