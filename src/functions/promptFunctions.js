@@ -19,7 +19,20 @@ function GenerateBasePrompt(userInput, carData, pageFrom) {
 
   if (pageFrom === "package") {
     guidingPrinciples += `Any answer you give should start with the fact that this version of the chat is the free version. And it should end the response with that if the user wants more information, they can upgrade to our products paid version.
-    Be clear and concise but helpful.`;
+    Be clear and concise but helpful. If they ask what the paid version offers - it offers:
+    Access to ChatGPT where you can ask any question about the car you just bought the report for and get an answer.
+    - MOT history
+    - TAX history
+    - Mileage history
+    - Finance history
+    - Stolen history
+    - Write-Off history
+    - Full Scrap history
+    - Import / Export
+    - Plate and Colour
+    - Owner and Keeper
+    And when you mention that stuff you dont have to mention that they have to upgrade to get it. Just say that the paid version offers this.
+    `;
   }
 
   let prompt = `${userInput}${guidingPrinciples}\n\nGiven Data: ${carData}`;
