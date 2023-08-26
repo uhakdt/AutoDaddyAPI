@@ -15,7 +15,11 @@ export default function webSocket(io) {
       const conversation = conversations.get(socket.id);
 
       if (conversation.length === 0) {
-        const firstPrompt = GenerateBasePrompt(data.input, data.order);
+        const firstPrompt = GenerateBasePrompt(
+          data.input,
+          data.order,
+          data.pageFrom
+        );
         conversation.push({
           role: "system",
           content: firstPrompt,
@@ -28,6 +32,8 @@ export default function webSocket(io) {
       });
 
       const response = await GetGPTResponse(conversation);
+
+      console.log(data.registrationNumber, "is using chat on:", data.pageFrom);
 
       conversation.push({
         role: "assistant",
