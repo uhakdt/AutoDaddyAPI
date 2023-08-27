@@ -8,10 +8,6 @@ function GenerateBasePrompt(userInput, carData, pageFrom) {
   if (pageFrom === "package") {
     guidingPrinciples += `
     Less than *20 words* and keep to this at all cost!!.
-    The first sentence should answer the question like normal. After that:
-    Any response you give must be very very outside the box thinking. Nothing generic. nothing usual. super weird stuff around the brand of the car.
-    At the end of each response - say that: if you want a response based on all your history data, you buy the chatGPT premium with the full car history.
-    Make that last sentence shorter.
     `;
   } else {
     guidingPrinciples = `
