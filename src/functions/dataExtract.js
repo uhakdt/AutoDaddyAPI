@@ -212,7 +212,6 @@ function extractVehicleMileage(mileageRecords) {
   const firstRecord = sortedMileageRecords[0];
   const lastRecord = sortedMileageRecords[sortedMileageRecords.length - 1];
 
-  const firstMileage = parseInt(firstRecord.Mileage, 10);
   const lastMileage = parseInt(lastRecord.Mileage, 10);
 
   const firstYear = new Date(
@@ -223,13 +222,11 @@ function extractVehicleMileage(mileageRecords) {
   ).getFullYear();
 
   const years = lastYear - firstYear;
-  const totalMileage = lastMileage - firstMileage;
-  const averageMileage =
-    years !== 0 ? (totalMileage / years).toFixed(0) : "N/A";
+  const averageMileage = years !== 0 ? (lastMileage / years).toFixed(0) : "N/A";
 
   return `
   Topic: Mileage
-  Total Mileage: ${totalMileage} miles
+  Total Mileage: ${lastMileage} miles
   Average Mileage: ${averageMileage} miles per year
   `;
 }
