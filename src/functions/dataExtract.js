@@ -91,7 +91,7 @@ function extractULEZCompliance(isUlezCompliant) {
 }
 
 function extractMOTHistory(motHistory) {
-  let motHistoryResult = "\n Sub Topic: MOT History:\n";
+  let motHistoryResult = "\nSub Topic: MOT History:\n";
 
   // Initialize variables
   let [
@@ -103,10 +103,12 @@ function extractMOTHistory(motHistory) {
     dangerousFailures,
     retests,
   ] = Array(7).fill(0);
+
   let recencyOfFailure = "N/A";
   let testDetails = [];
+  let annotations = [];
 
-  if (motHistory !== undefined && motHistory !== null) {
+  if (Array.isArray(motHistory)) {
     for (let record of motHistory) {
       // Count pass and fail results
       let testResult = record["TestResult"] || "N/A";
@@ -121,21 +123,39 @@ function extractMOTHistory(motHistory) {
       adviceItems += record["AdvisoryNoticeCount"] || 0;
       totalItemsFailed += (record["FailureReasonList"] || []).length;
       dangerousFailures += record["DangerousFailureCount"] || 0;
+
       if (record["IsRetest"]) {
         retests++;
       }
 
       // Append test details for later reporting
-      testDetails.push({
-        ExpiryDate: record["ExpiryDate"] || "N/A",
-        TestDate: record["TestDate"] || "N/A",
-        TestNumber: record["TestNumber"] || "N/A",
-        TestResult: record["TestResult"] || "N/A",
-      });
+      testDetails.push(
+        `ExpiryDate: ${record["ExpiryDate"] || "N/A"}, TestDate: ${
+          record["TestDate"] || "N/A"
+        }, TestNumber: ${record["TestNumber"] || "N/A"}, TestResult: ${
+          record["TestResult"] || "N/A"
+        }`
+      );
+
+      // Handle annotations
+      if (
+        record["AnnotationDetailsList"] &&
+        record["AnnotationDetailsList"].length > 0
+      ) {
+        record["AnnotationDetailsList"].forEach((annotation, index) => {
+          annotations.push(
+            `Advice ${index + 1}:\nType: ${annotation.Type}\nDetails: ${
+              annotation.Text
+            }\nDangerous: ${annotation.Dangerous}\n`
+          );
+        });
+      }
     }
+
     // Calculate pass rate, or set to 0 if no tests
     totalTests = motHistory.length;
-    let passRate = totalTests != 0 ? (passCount / totalTests) * 100 : 0;
+    let passRate =
+      totalTests !== 0 ? ((passCount / totalTests) * 100).toFixed(2) : 0.0;
 
     // Append the results to motHistoryResult string
     motHistoryResult += "MOT Metrics:\n";
@@ -145,11 +165,21 @@ function extractMOTHistory(motHistory) {
     motHistoryResult += `Total Items Failed: ${totalItemsFailed}\n`;
     motHistoryResult += `Dangerous Failures: ${dangerousFailures}\n`;
     motHistoryResult += `Retests: ${retests}\n`;
-    motHistoryResult += `Recency of Failure: ${recencyOfFailure}\n`;
+    motHistoryResult += `Recency of Failure: ${recencyOfFailure}\n\n`;
 
+    motHistoryResult += "Individual Test Details:\n";
     for (let test of testDetails) {
-      motHistoryResult += JSON.stringify(test) + "\n";
+      motHistoryResult += test + "\n";
     }
+
+    if (annotations.length > 0) {
+      motHistoryResult += "\nAnnotation Details:\n";
+      for (let annotation of annotations) {
+        motHistoryResult += annotation + "\n";
+      }
+    }
+  } else {
+    motHistoryResult += "No MOT history available.\n";
   }
 
   return motHistoryResult;
