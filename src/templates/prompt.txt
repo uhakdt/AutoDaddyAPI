@@ -66,6 +66,10 @@ Using only the format below, provide a vehicle analysis. Do not include any othe
         "rating": "Provide the rating here",
         "content": "Provide content about main details analysis"
     },
+    "salvage": {
+        "rating": "Provide the rating here",
+        "content": "Provide content about the salvage analysis"
+    }
     "energy_&_consumption_analysis": {
         "rating": "Provide the rating here",
         "content": "Provide content about energy and consumption analysis"

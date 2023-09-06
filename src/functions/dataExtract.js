@@ -24,7 +24,9 @@ function dataExtract(dataMain, vehicleFreeData, isUlezCompliant) {
     extractStolenInfo(dataMain.VdiCheckFull) +
     extractImportExportInfo(dataMain.VehicleAndMotHistory.VehicleRegistration) +
     extractWriteOffInfo(dataMain.VdiCheckFull) +
-    extractVICInfo(dataMain.VehicleAndMotHistory.VehicleHistory);
+    extractVICInfo(dataMain.VehicleAndMotHistory.VehicleHistory) +
+    extractSalvage(dataMain.Salvage) +
+    extractTaxi(dataMain.Taxi);
 
   return combinedResults;
 }
@@ -463,6 +465,50 @@ function extractVICInfo(vehicleHistory) {
   }
 
   return vicResults;
+}
+
+function extractSalvage(salvage) {
+  let salvageResults = "\nTopic: Salvage\n";
+
+  if (salvage.salvage_auction_record_found) {
+    salvageResults += "Salvage record found.\n";
+
+    salvage.salvage_auction_records.forEach((record, i) => {
+      salvageResults += `\n=== Salvage Record ${i + 1} ===\n`;
+
+      const {
+        salvage_auction_record_id,
+        salvage_auction_lot_desc,
+        salvage_auction_lot_date,
+        mileage,
+        primary_damage_desc,
+        secondary_damage_desc,
+      } = record;
+
+      salvageResults += `Record ID: ${salvage_auction_record_id}\n`;
+      salvageResults += `Lot Description: ${salvage_auction_lot_desc}\n`;
+      salvageResults += `Lot Date: ${salvage_auction_lot_date}\n`;
+      salvageResults += `Mileage: ${mileage}\n`;
+      salvageResults += `Primary Damage: ${primary_damage_desc}\n`;
+      salvageResults += `Secondary Damage: ${secondary_damage_desc}\n`;
+    });
+  } else {
+    salvageResults += "No salvage record found.\n";
+  }
+
+  return salvageResults;
+}
+
+function extractTaxi(taxi) {
+  let taxiResults = "\nTopic: Taxi\n";
+
+  if (taxi.is_possible_taxi) {
+    taxiResults += "Taxi record found.\n";
+  } else {
+    taxiResults += "No taxi record found.\n";
+  }
+
+  return taxiResults;
 }
 
 export default dataExtract;
