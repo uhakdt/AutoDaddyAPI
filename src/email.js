@@ -1,4 +1,3 @@
-import { google } from "googleapis";
 import nodemailer from "nodemailer";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -7,27 +6,14 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const oAuth2Client = new google.auth.OAuth2(
-  process.env["GCP_GMAIL_CLIENT_ID"],
-  process.env["GCP_GMAIL_CLIENT_SECRET"],
-  process.env["GCP_GMAIL_REDIRECT_URI"]
-);
-
-oAuth2Client.setCredentials({
-  refresh_token: process.env["GCP_GMAIL_REFRESH_TOKEN"],
-});
-
-const createTransport = async () => {
-  const accessToken = await oAuth2Client.getAccessToken();
+const createTransport = () => {
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.zoho.eu",
+    port: 465,
+    secure: true,
     auth: {
-      type: "OAuth2",
-      user: "uhakdt@gmail.com",
-      clientId: process.env["GCP_GMAIL_CLIENT_ID"],
-      clientSecret: process.env["GCP_GMAIL_CLIENT_SECRET"],
-      refreshToken: process.env["GCP_GMAIL_REFRESH_TOKEN"],
-      accessToken: accessToken,
+      user: "main@autodaddy.co.uk",
+      pass: process.env["ZOHO_PASSWORD"],
     },
   });
 };
@@ -42,11 +28,11 @@ const readEmailTemplate = (url) => {
 
 const sendEmail = async (email, url) => {
   try {
-    const transport = await createTransport();
+    const transport = createTransport();
     const emailTemplate = readEmailTemplate(url);
 
     const mailOptions = {
-      from: "AutoDaddy <uhakdt@gmail.com>",
+      from: "AutoDaddy <main@autodaddy.co.uk>",
       to: email,
       subject: "AutoDaddy - Your Report is ready",
       html: emailTemplate,
