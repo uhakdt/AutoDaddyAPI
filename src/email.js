@@ -8,26 +8,31 @@ const __dirname = path.dirname(__filename);
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const readEmailTemplate = (url) => {
-  const template = fs.readFileSync(path.join(__dirname, "./templates/emailTemplate.html"), "utf8");
-  return template.replace("{{url}}", url);
-};
-
 const sendEmail = async (email, url) => {
   try {
-    const emailTemplate = readEmailTemplate(url);
+    console.log("Sending email to: ", email);
+    console.log("Email URL: ", url);
 
     const msg = {
       to: email,
       from: "main@autodaddy.co.uk",
-      subject: "AutoDaddy - Your Report is ready",
-      html: emailTemplate,
+      template_id: "d-05c2d8766a174acf9a3fb243583a163d",
+      dynamic_template_data: {
+        WebLink: url,
+      },
+      tracking_settings: {
+        click_tracking: {
+          enable: false,
+          enable_text: false,
+        },
+      },
     };
 
     const result = await sgMail.send(msg);
+    console.log("Email sent successfully");
     return result;
   } catch (error) {
-    console.error(error);
+    console.error("Failed to send email:", error);
     throw new Error("Failed to send email.");
   }
 };
