@@ -11,7 +11,7 @@ const GetGPTResponse = async (conversation) => {
 
   const params = {
     messages: conversation,
-    model: "gpt-4",
+    model: "gpt-4-0125-preview",
     temperature: 0.3,
   };
 

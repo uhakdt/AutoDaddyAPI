@@ -13,7 +13,7 @@ const router = express.Router();
 router.use(express.text());
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL_NAME = "gpt-4";
+const MODEL_NAME = "gpt-4-0125-preview";
 
 async function getPromptTemplate() {
   const filePath = path.join(__dirname, "../templates/prompt.txt");
