@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -6,39 +6,25 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const createTransport = () => {
-  return nodemailer.createTransport({
-    host: "smtp.zoho.eu",
-    port: 465,
-    secure: true,
-    auth: {
-      user: "main@autodaddy.co.uk",
-      pass: process.env["ZOHO_PASSWORD"],
-    },
-  });
-};
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const readEmailTemplate = (url) => {
-  const template = fs.readFileSync(
-    path.join(__dirname, "./templates/emailTemplate.html"),
-    "utf8"
-  );
+  const template = fs.readFileSync(path.join(__dirname, "./templates/emailTemplate.html"), "utf8");
   return template.replace("{{url}}", url);
 };
 
 const sendEmail = async (email, url) => {
   try {
-    const transport = createTransport();
     const emailTemplate = readEmailTemplate(url);
 
-    const mailOptions = {
-      from: "AutoDaddy <main@autodaddy.co.uk>",
+    const msg = {
       to: email,
+      from: "main@autodaddy.co.uk",
       subject: "AutoDaddy - Your Report is ready",
       html: emailTemplate,
     };
 
-    const result = await transport.sendMail(mailOptions);
+    const result = await sgMail.send(msg);
     return result;
   } catch (error) {
     console.error(error);
