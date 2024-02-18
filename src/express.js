@@ -17,11 +17,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   path: "/api/v1/chat",
   cors: {
-    origin: [
-      "https://autodaddy.co.uk",
-      "https://autodaddy.loca.lt",
-      "http://localhost:3000",
-    ],
+    origin: ["https://autodaddy.co.uk", "https://autodaddy.loca.lt", "http://localhost:3000", "https://autodaddy-dev.netlify.app"],
   },
 });
 
@@ -43,11 +39,7 @@ app.use(hpp());
 
 app.use(
   cors({
-    origin: [
-      "https://autodaddy.co.uk",
-      "https://autodaddy.loca.lt",
-      "http://localhost:3000",
-    ],
+    origin: ["https://autodaddy.co.uk", "https://autodaddy.loca.lt", "http://localhost:3000", "https://autodaddy-dev.netlify.app"],
   })
 );
 
