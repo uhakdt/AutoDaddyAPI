@@ -10,7 +10,7 @@ Rating Logic: The rating should represent a synthesis of the data provided, set 
 Structure: Maintain clear topic divisions and adhere to the order and nomenclature provided.
 
 Summary:
-Draw from the car's data to generate a 100-word evaluative summary addressing:
+Draw from the car's data to generate a 20-word evaluative summary addressing:
 
 Performance: Contextualize against cars of similar class. Any standout features?
 Fuel Efficiency: How does it fare against its peers?
@@ -33,7 +33,7 @@ Excellent: This is near perfect. There's very little to criticize here.
 Outstanding: This is the best it could possibly be. It's exceptional and far exceeds expectations.
 
 Deep Dive Analysis:
-For every topic, craft a 50-word examination. Each should:
+For every topic, craft a 20-word examination. Each should:
 
 Commence with a rating, representing the synthesis of information.
 Emphasize intersections of various data points, not just standalone facts.
@@ -60,59 +60,59 @@ Using only the format below, provide a vehicle analysis. Do not include any othe
 {
     "summary": {
         "rating": "Provide the rating here (e.g., Excellent, Good, Average, Poor)",
-        "content": "Provide a brief summary content here"
+        "content": "Provide a brief summary content here - 20 words or less"
     },
     "main_details_analysis": {
         "rating": "Provide the rating here",
-        "content": "Provide content about main details analysis"
+        "content": "Provide content about main details analysis - 20 words or less"
     },
     "salvage": {
         "rating": "Provide the rating here",
-        "content": "Provide content about the salvage analysis"
+        "content": "Provide content about the salvage analysis - 20 words or less"
     }
     "energy_&_consumption_analysis": {
         "rating": "Provide the rating here",
-        "content": "Provide content about energy and consumption analysis"
+        "content": "Provide content about energy and consumption analysis - 20 words or less"
     },
     "mot_metrics_analysis": {
         "rating": "Provide the rating here",
-        "content": "Provide content about MOT metrics"
+        "content": "Provide content about MOT metrics - 20 words or less"
     },
     "tax_details_analysis": {
         "rating": "Provide the rating here",
-        "content": "Provide content about tax details"
+        "content": "Provide content about tax details - 20 words or less"
     },
     "mileage_analysis": {
         "rating": "Provide the rating here",
-        "content": "Provide content about mileage analysis"
+        "content": "Provide content about mileage analysis - 20 words or less"
     },
     "plate_changes": {
         "rating": "Provide the rating here",
-        "content": "Provide content about plate changes"
+        "content": "Provide content about plate changes - 20 words or less"
     },
     "outstanding_finances": {
         "rating": "Provide the rating here",
-        "content": "Provide content about any outstanding finances"
+        "content": "Provide content about any outstanding finances - 20 words or less"
     },
     "important_checks": {
         "rating": "Provide the rating here",
-        "content": "Provide content about important checks"
+        "content": "Provide content about important checks - 20 words or less"
     },
     "stolen": {
         "rating": "Provide the rating here",
-        "content": "Provide content about stolen checks"
+        "content": "Provide content about stolen checks - 20 words or less"
     },
     "import_/_export": {
         "rating": "Provide the rating here",
-        "content": "Provide content about import/export checks"
+        "content": "Provide content about import/export checks - 20 words or less"
     },
     "write_off": {
         "rating": "Provide the rating here",
-        "content": "Provide content about write-off checks"
+        "content": "Provide content about write-off checks - 20 words or less"
     },
     "vic_inspected": {
         "rating": "Provide the rating here",
-        "content": "Provide content about VIC inspections"
+        "content": "Provide content about VIC inspections - 20 words or less"
     }
 }
 Note: Replace the placeholder text with the respective information.
