@@ -2,7 +2,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { db, storage } from "../firebase.js";
 import dataExtract from "./dataExtract.js";
-import sendEmail from "../email.js";
+import { sendEmail } from "../email.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
