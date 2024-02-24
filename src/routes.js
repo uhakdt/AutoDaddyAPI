@@ -8,6 +8,7 @@ import stripeRoutes from "./routes/stripeRoutes.js";
 import firebaseRoutes from "./routes/firebaseRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import gptRoutes from "./routes/gptRoutes.js";
+import referralRoutes from "./routes/referralRoutes.js";
 
 app.get("/api/v1", (req, res) => {
   console.log("ﷺ ﷽");
@@ -21,6 +22,7 @@ app.use("/api/v1/stripe", stripeRoutes);
 app.use("/api/v1/firebase", firebaseRoutes);
 app.use("/api/v1/email", emailRoutes);
 app.use("/api/v1/gpt", gptRoutes);
+app.use("/api/v1/referral", referralRoutes);
 
 webSocket(io);
 
