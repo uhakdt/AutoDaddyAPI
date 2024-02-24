@@ -71,6 +71,7 @@ router.post("/send_money_to_user", async (req, res) => {
     await sendEmailReferralUsed(
       "uhakdt@gmail.com",
       customerEmail,
+      uid,
       salesAgentEmail,
       sortCode,
       accountNumber

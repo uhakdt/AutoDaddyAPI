@@ -38,22 +38,24 @@ const sendEmail = async (email, url) => {
 };
 
 const sendEmailReferralUsed = async (
-  email,
+  recipientEmail,
   customerEmail,
+  customerUid,
   salesAgentEmail,
   sortCode,
   accountNumber
 ) => {
   try {
-    console.log("Preparing to send referral used email to: ", email);
+    console.log("Preparing to send referral used email to: ", recipientEmail);
 
     const msg = {
-      to: email,
+      to: recipientEmail,
       from: "main@autodaddy.co.uk",
       subject: "Referral Code Used",
       text: `A referral code has been used.\n\nCustomer Email: ${customerEmail}\nSales Agent Email: ${salesAgentEmail}\nSort Code: ${sortCode}\nAccount Number: ${accountNumber}`,
       html: `<strong>A referral code has been used.</strong><br><br>
              <strong>Customer Email:</strong> ${customerEmail}<br>
+             <strong>Customer UID:</strong> ${customerUid}<br>
              <strong>Sales Agent Email:</strong> ${salesAgentEmail}<br>
              <strong>Sort Code:</strong> ${sortCode}<br>
              <strong>Account Number:</strong> ${accountNumber}<br>`,
