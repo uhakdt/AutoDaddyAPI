@@ -10,9 +10,6 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendEmail = async (email, url) => {
   try {
-    console.log("Sending email to: ", email);
-    console.log("Email URL: ", url);
-
     const msg = {
       to: email,
       from: "main@autodaddy.co.uk",
@@ -30,6 +27,32 @@ const sendEmail = async (email, url) => {
 
     const result = await sgMail.send(msg);
     console.log("Email sent successfully");
+    return result;
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    throw new Error("Failed to send email.");
+  }
+};
+
+const sendEmailReferralLink = async (email, url) => {
+  try {
+    const msg = {
+      to: email,
+      from: "main@autodaddy.co.uk",
+      template_id: "d-97fec23e1d6647fa9950a0b0153a4b9a",
+      dynamic_template_data: {
+        ReferralLink: url,
+      },
+      tracking_settings: {
+        click_tracking: {
+          enable: false,
+          enable_text: false,
+        },
+      },
+    };
+
+    const result = await sgMail.send(msg);
+    console.log("Referral Email sent successfully");
     return result;
   } catch (error) {
     console.error("Failed to send email:", error);
@@ -76,4 +99,4 @@ const sendEmailReferralUsed = async (
   }
 };
 
-export { sendEmail, sendEmailReferralUsed };
+export { sendEmail, sendEmailReferralUsed, sendEmailReferralLink };
